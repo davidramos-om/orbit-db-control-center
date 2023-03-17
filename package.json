@@ -10,6 +10,9 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^2.5.1",
+    "@types/orbit-db": "https://github.com/orbitdb/orbit-db-types.git",
+    "ipfs": "^0.66.0",
+    "orbit-db": "^0.29.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.9.0",
