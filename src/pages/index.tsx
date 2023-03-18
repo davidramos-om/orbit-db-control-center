@@ -1,10 +1,7 @@
 import type { FC } from 'react'
 import { Box, Button, Stack, Text } from '@chakra-ui/react';
-import { Link } from 'react-router-dom'
 import CreateDbDialog from "../blocks/CreateDB";
 
-import { Buffer } from 'buffer'
-globalThis.Buffer = Buffer
 const index: FC = () => {
     return (
         <Box>
