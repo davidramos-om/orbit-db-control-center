@@ -17,3 +17,10 @@ export interface DBEntry {
     address: string;
     added: number;
 };
+
+export enum DBState {
+    connecting = 'connecting',
+    connected = 'connected',
+    disconnected = 'disconnected',
+    error = 'error'
+}

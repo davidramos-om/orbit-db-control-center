@@ -1,6 +1,9 @@
 import { Avatar, Box, Button, Divider, Flex, Heading, HStack, Icon, Link, Spacer, Stack, Text } from "@chakra-ui/react";
 import { Link as Reactink } from 'react-router-dom'
-import type { FC } from 'react'
+import { useState, useEffect } from 'react';
+
+import { initIPFS, initOrbitDB } from 'src/database'
+import { DBState } from "src/types/orbitdb";
 
 
 type SystemProps = {
@@ -9,9 +12,45 @@ type SystemProps = {
 
 const System = ({ label }: SystemProps) => {
 
+    const [ dbState, setDbState ] = useState<DBState>(DBState.connecting);
+
+    useEffect(() => {
+
+        let isMounted = true;
+
+        const init = async () => {
+            try {
+
+                const ifps = await initIPFS();
+
+                if (ifps) {
+                    const db = await initOrbitDB(ifps);
+                    if (isMounted)
+                        setDbState((await db?.id) ? DBState.connected : DBState.disconnected);
+                }
+                else
+                    setDbState(() => DBState.disconnected);
+            }
+            catch (error: any) {
+                console.log(error);
+                setDbState(() => DBState.error);
+            }
+        }
+
+        init();
+
+        return () => {
+            isMounted = false;
+        }
+
+    }, []);
+
+
+    const color = dbState === DBState.connected ? 'green.500' : dbState === DBState.error ? 'red.500' : dbState === DBState.disconnected ? 'black.500' : 'orange.500';
+
     return (
         <>
-            <Icon viewBox='0 0 200 200' color='green.500'>
+            <Icon viewBox='0 0 200 200' color={color}>
                 <path fill='currentColor' d='M 100, 100 m -75, 0 a 75,75 0 1,0 150,0 a 75,75 0 1,0 -150,0' />
             </Icon>
             <Text> {label} </Text>
@@ -55,7 +94,6 @@ const Header = ({ children }: HeaderProps) => {
             >
                 <HStack spacing={1} p={2}>
                     <Text as="b">Implementations:</Text>
-                    <System label='IPFS' />
                     <System label='OrbitDB' />
                 </HStack>
             </Flex>
@@ -85,4 +123,4 @@ const Header = ({ children }: HeaderProps) => {
     );
 }
 
-export default Header
+export default Header;
