@@ -2,7 +2,9 @@ import { lazy } from "react";
 import { RouteObject } from 'react-router-dom';
 
 
-export const HomePage = lazy(() => import('./pages/index'))
+import HomePage from './pages';
+
+// export const HomePage = lazy(() => import('./pages/index'))
 export const AboutPage = lazy(() => import('./pages/about'))
 export const BlogPage = lazy(() => import('./pages/blog'))
 export const NotFoundPage = lazy(() => import('./pages/404'))
