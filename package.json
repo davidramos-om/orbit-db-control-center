@@ -10,10 +10,11 @@
   },
   "browserslist": "last 1 Chrome version",
   "dependencies": {
+    "@chakra-ui/icons": "^2.0.17",
     "@chakra-ui/react": "^2.5.1",
     "@rollup/plugin-inject": "^5.0.3",
     "buffer": "^6.0.3",
-    "ipfs": "^0.66.0",
+    "ipfs-core": "^0.18.0",
     "orbit-db": "^0.29.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

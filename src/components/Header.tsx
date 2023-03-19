@@ -22,22 +22,25 @@ const System = ({ label }: SystemProps) => {
             try {
 
                 const ifps = await initIPFS();
+                console.log(`🐛  -> 🔥 :  init 🔥 :  ifps:`, ifps);
 
                 if (ifps) {
-                    const db = await initOrbitDB(ifps);
-                    if (isMounted)
-                        setDbState((await db?.id) ? DBState.connected : DBState.disconnected);
+                    const db = await initOrbitDB(ifps);                    
+                    console.log(`🐛  -> 🔥 :  init 🔥 :  db:`, db);
+                    setDbState((db?.id) ? DBState.connected : DBState.disconnected);
                 }
                 else
                     setDbState(() => DBState.disconnected);
             }
             catch (error: any) {
-                console.log(error);
+                console.error("init.errors : ", { error });
                 setDbState(() => DBState.error);
             }
         }
 
-        init();
+        setTimeout(() => {
+            init();
+        }, 3000);
 
         return () => {
             isMounted = false;
@@ -46,6 +49,7 @@ const System = ({ label }: SystemProps) => {
     }, []);
 
 
+    console.log(`🐛  -> 🔥 :  System 🔥 :  dbState:`, dbState);
     const color = dbState === DBState.connected ? 'green.500' : dbState === DBState.error ? 'red.500' : dbState === DBState.disconnected ? 'black.500' : 'orange.500';
 
     return (

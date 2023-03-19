@@ -37,7 +37,7 @@ type confirmAlertProps = AlertProps & {
 }
 
 type ShowAlertProps = AlertProps & {
-  title: string;
+  title?: string;
   text: string;
   icon?: SweetAlertIcon | "none";
   allowOutsideClick?: boolean;
@@ -113,7 +113,6 @@ export const showInputAlert = async ({
   labelConfirm = "Accept",
   inputType = "text",
   defaultValue = "",
-  isWarning = false,
   confirmButtonColor,
   cancelButtonColor,
 }: ShowInputAlertProps) => {
@@ -125,7 +124,8 @@ export const showInputAlert = async ({
     inputValue: defaultValue,
     inputPlaceholder: placeholder,
     inputAttributes: { 'aria-label': placeholder },
-    confirmButtonColor: confirmButtonColor,
+    confirmButtonColor,
+    cancelButtonColor,
     reverseButtons: true,
     showCancelButton: true,
     allowOutsideClick: false,
