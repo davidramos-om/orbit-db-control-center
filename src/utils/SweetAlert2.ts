@@ -58,7 +58,6 @@ export const confirmAlert = async (
   }: confirmAlertProps) => {
 
   const result = await MySwal.fire({
-    target: 'root',
     title: title,
     text: text,
     html: html ? text : '',
@@ -90,7 +89,6 @@ export const showAlert = async ({
   cancelButtonColor,
 }: ShowAlertProps) => {
   const result = await MySwal.fire({
-    target: "root",
     title: title,
     text: text,
     html: html ? text : "",
