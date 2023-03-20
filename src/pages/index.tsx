@@ -1,55 +1,67 @@
-import { FC, useEffect, useState } from 'react'
-import { Box, Button, Stack, Text } from '@chakra-ui/react';
+import { useEffect, useState } from 'react'
+import { Box, Divider, Spacer, Stack, Text } from '@chakra-ui/react';
 
-import CreateDbDialog from "../blocks/CreateDB";
-import { getAllDatabases } from "../database";
-import DataTable from "../components/Table";
+import useIsMounted from 'src/hooks/useIsMounted';
+import CreateDbDialog from "src/blocks/CreateDB";
+import RegreshDataBases from "src/blocks/RefreshDBs";
+import OpenDbDialog from "src/blocks/OpenDB";
+import DataBaseList, { DBRow } from "src/blocks/DbList";
+import { getAllDatabases } from "src/lib/db";
+import { MapOrbitDbEntry } from "src/lib/mapper";
 
-const index: FC = () => {
+const HomePage = () => {
 
-    const [ dbs, setDbs ] = useState<any[]>([]);
+    const [ dbs, setDbs ] = useState<LogEntry<any>[]>([]);
+    const isMounted = useIsMounted();
 
     useEffect(() => {
-
-
-        let isMounted = true;
-
-        const getDbs = async () => {
-            const _dbs = await getAllDatabases();
-            console.log(`🐛  -> 🔥 :  getDbs 🔥 :  _dbs:`, _dbs);
-
-            setDbs(_dbs);
-        }
-
         getDbs();
-
-        return () => {
-            isMounted = false;
-        }
-
     }, []);
 
 
+    const getDbs = async () => {
+
+        const _dbs = await getAllDatabases();
+        if (isMounted())
+            setDbs(_dbs);
+    }
+
+    const _rows = dbs.map((db) => {
+
+        const entry = MapOrbitDbEntry(db);
+
+        const _r: DBRow = {
+            id: entry.id,
+            multiHash: entry.hash,
+            name: entry.payload.value.name,
+            address: entry.payload.value.address,
+            date: new Date(entry.payload.value.added),
+            type: entry.payload.value.type
+        }
+
+        return _r;
+
+    });
+
     return (
-        <Box>
+        <Box
+            id="home-page"
+        >
             <Text as="b">DATABASES:</Text>
-            <Stack
-                direction={[ 'column', 'row' ]}
-            >
-                <CreateDbDialog />
-                <Button
-                    variant={"outline"}
-                    colorScheme='teal'
-                >
-                    Open Database
-                </Button>
+            <Stack direction={[ 'column', 'row' ]}>
+                <CreateDbDialog onDbCreated={getDbs} />
+                <RegreshDataBases onProgramsLoaded={setDbs} />
+                <OpenDbDialog onDbOpened={getDbs} />                
             </Stack>
+            <br />
+            <Divider color="white" borderColor={"gray.500"} />
+            <br />
             <Stack>
-                <DataTable title="Databases" rows={dbs} />
+                <DataBaseList dbs={_rows} />
             </Stack>
 
         </Box>
     );
 }
 
-export default index
+export default HomePage;
