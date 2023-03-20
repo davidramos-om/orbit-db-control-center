@@ -1,19 +1,19 @@
-import { Suspense, lazy } from 'react'
-import { useRoutes, } from 'react-router-dom';
-import Header from "src/components/Header";
+import './App.css';
 
-import './App.css'
+import { useRoutes, } from 'react-router-dom';
+import { Suspense } from 'react'
+
+import Layout from "src/components/Layout";
 import { routes } from "./routes";
 
 const App = () => {
   return (
     <Suspense fallback={<p>Loading...</p>}>
-      <Header>
+      <Layout>
         {useRoutes(routes)}
-      </Header>
+      </Layout>
     </Suspense>
   );
 }
-
 
 export default App

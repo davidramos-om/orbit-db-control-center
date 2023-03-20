@@ -1,59 +1,59 @@
-import {
-    Table,
-    Thead,
-    Tbody,
-    Tr,
-    Th,
-    Td,
-    TableCaption,
-    TableContainer,
-    Divider,
-} from '@chakra-ui/react'
+import { ReactNode } from "react";
+import { Table, Thead, Tbody, Tr, Th, Td, TableCaption, TableContainer } from '@chakra-ui/react';
 
-import { ViewIcon, DeleteIcon, CloseIcon, SettingsIcon } from '@chakra-ui/icons'
+import { ShortDateDividerHelper } from "src/utils/date-service";
 
-type DataTableProps = {
-    title: string,
-    rows: any[]
+export type DataColumn = {
+    name: string;
+    selector: string;
+    type: 'string' | 'number' | 'date' | 'boolean' | 'node'
+    headerNode?: ReactNode;
+    renderRowNode?: (row: any) => ReactNode;
+    onClick?: (row: any) => void;
 }
 
-export default function DataTable({ rows, title }: DataTableProps) {
+type DataTableProps = {
+    caption?: {
+        title?: string;
+        placement?: 'top' | 'bottom';
+        show: boolean;
+    },
+    keyField: string;
+    columns: DataColumn[];
+    rows: any[];
+}
+
+export default function DataTable({ rows, keyField, columns, caption = { title: '', placement: "top", show: true } }: DataTableProps) {
 
     return (
         <TableContainer>
             <Table
                 variant='simple'
             >
-                <TableCaption placement="top">
-                    {title}
+                {caption.show && (
+                    <TableCaption placement={caption.placement}>
+                        {caption.title}
                 </TableCaption>
+                )}
                 <Thead>
                     <Tr>
-                        <Th>
-                            <ViewIcon />
-                        </Th>
-                        <Th>NAME</Th>
-                        <Th>TYPE</Th>
-                        <Th>ADDRESS</Th>
-                        <Th>DATE</Th>
-                        <Th>
-                            <DeleteIcon />
-                        </Th>
+                        {columns.map((column) => (
+                            <Th key={column.name}>{column.headerNode || column.name}</Th>
+                        ))}
                     </Tr>
                 </Thead>
                 <Tbody>
                     {rows.map((row) => (
-                        <Tr key={row.id}>
-                            <Td>
-                                <SettingsIcon />
-                            </Td>
-                            <Td>{row.name}</Td>
-                            <Td>{row.type}</Td>
-                            <Td>{row.address}</Td>
-                            <Td>{row.date}</Td>
-                            <Td>
-                                <CloseIcon color="red.500" />
-                            </Td>
+                        <Tr key={row[ keyField ]}>
+                            {columns.map((column) => (
+                                <Td key={`${row[ keyField ]}_${column.name}`}>
+                                    {column.type === 'node' && (column.renderRowNode ? column.renderRowNode(row) : row[ column.selector ])}
+                                    {column.type === 'string' && (row[ column.selector ])}
+                                    {column.type === 'number' && (row[ column.selector ])}
+                                    {column.type === 'date' && (row[ column.selector ] ? ShortDateDividerHelper(row[ column.selector ], true) : '')}
+                                    {column.type === 'boolean' && (row[ column.selector ] ? 'Yes' : 'No')}
+                                </Td>
+                            ))}
                         </Tr>
                     ))}
                 </Tbody>

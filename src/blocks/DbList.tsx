@@ -1,13 +1,16 @@
-import { Icon, IconButton } from '@chakra-ui/react';
+import { useCallback, useMemo } from "react";
+import { Badge, IconButton } from '@chakra-ui/react';
 import { ViewIcon, DeleteIcon, CloseIcon, SettingsIcon } from '@chakra-ui/icons'
 
 import DataTable, { DataColumn } from "src/components/Table";
-import { programs, orbitdb } from 'src/lib/db';
-import { useCallback, useMemo } from "react";
-import OrbitDB from "orbit-db";
 
-type Props = {
-    dbs: LogEntry<any>[];
+export type DBRow = {
+    id: string;
+    multiHash: string;
+    name: string;
+    type: string;
+    address: string;
+    date: Date;
 }
 
 
@@ -16,93 +19,98 @@ type getColumnsArgs = {
     onOpen?: (row: any) => void;
 }
 
-const getColumns = ({ onDelete, onOpen }: getColumnsArgs): DataColumn[] => {
+type Colors = {
+    [ key: string ]: string
+}
 
+const colors: Colors = {
+    'feed': 'green',
+    'eventlog': 'blue',
+    'keyvalue': 'purple',
+    'counter': 'orange',
+    'docstore': 'teal',
+}
+
+
+const getColumns = ({ onDelete, onOpen }: getColumnsArgs): DataColumn[] => {
 
     const columns: DataColumn[] = [ {
         name: 'settings',
         selector: '',
         type: 'node',
         headerNode: <ViewIcon boxSize={5} />,
-        renderRowNode: (row: any) => <IconButton icon={<SettingsIcon color="black.500" boxSize={5} />} aria-label="settings" size="sm" onClick={() => onOpen?.(row)} />
+        renderRowNode: (row: any) => <IconButton
+            icon={<SettingsIcon color="black.500" boxSize={5} />}
+            aria-label="settings"
+            size="sm"
+            onClick={() => onOpen?.(row)}
+        />
     },
     {
-        name: 'name',
+        name: 'Name',
         selector: 'name',
         type: 'string',
     },
     {
-        name: 'type',
+        name: 'Type',
         selector: 'type',
-        type: 'string',
+        type: 'node',
+        renderRowNode: (row: any) => <Badge
+            variant="subtle"
+            colorScheme={colors[ row.type ] || 'yellow'}
+        >
+            {row.type}
+        </Badge>
 
     },
     {
-        name: 'address',
+        name: 'Address',
         selector: 'address',
         type: 'string',
     },
     {
-        name: 'date',
+        name: 'Date',
         selector: 'date',
-        type: 'string',
+        type: 'date',
     },
     {
         name: 'delete',
         selector: '',
         type: 'node',
         headerNode: <DeleteIcon color="black.500" boxSize={5} />,
-        renderRowNode: (row: any) => <IconButton icon={<CloseIcon color="red.500" boxSize={4} />} aria-label="delete" size="sm" onClick={() => onDelete?.(row)} />
+        renderRowNode: (row: any) => <IconButton
+            icon={<CloseIcon color="red.500" boxSize={4} />}
+            aria-label="delete"
+            size="sm"
+            onClick={() => onDelete?.(row)}
+        />
     }
     ];
 
     return columns;
 }
 
+
+type Props = {
+    dbs: DBRow[];
+}
+
 export default function DataBaseList({ dbs = [] }: Props) {
-    console.log(`🐛  -> 🔥 :  DataBaseList 🔥 :  dbs:`, { dbs, programs });
 
-
-    const dbInstance = (orbitdb as OrbitDB);
-    console.log(`🐛  -> 🔥 :  DataBaseList 🔥 :  dbInstance:`, dbInstance);
-
-
-
-
-
-    const query = '';
-    let _programs = programs;
-    console.log(`🐛  -> 🔥 :  DataBaseList 🔥 :  _programs:`, _programs);
-
-
-    const _rows = dbs.map((db, index) => {
-
-        const _clock = db.clock;
-        const ts = new Date(_clock.time * 1000);
-
-        return {
-            id: db.hash,
-            name: db.hash,
-            type: '',
-            address: db.id,
-            date: new Date(ts).toLocaleString(),
-        }
-
-    });
-
-    const handleDelete = useCallback((row: any) => {
-
-
+    const handleDelete = useCallback((row: DBRow) => {
+        console.log(`🐛  -> 🔥 :  handleDelete 🔥 :  row:`, row);
     }, []);
 
-    const handleOpen = useCallback((row: any) => { }, []);
-
+    const handleOpen = useCallback((row: DBRow) => {
+        console.log(`🐛  -> 🔥 :  DataBaseList 🔥 :  row:`, row);
+    }, []);    
 
     const columns = useMemo(() => getColumns({ onDelete: handleDelete, onOpen: handleOpen }), [ handleDelete, handleOpen ]);
 
     return (
         <DataTable
-            rows={_rows}
+            keyField="multiHash"
+            rows={dbs}
             columns={columns}
             caption={{ show: false }}
         />
