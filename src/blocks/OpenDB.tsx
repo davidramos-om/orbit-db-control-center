@@ -8,11 +8,11 @@ import { showAlert } from "src/utils/SweetAlert2";
 import { createDatabase } from 'src/lib/db';
 import { DBType, DBPermission, DbTypeExtendedDescription, DBPermissionExtendedDescription } from 'src/lib/types';
 
-type CreateDbDialogProps = {
-    onDbCreated: (hash: string) => void;
+type OpenDbProps = {
+    onDbOpened: (hash: string) => void;
 }
 
-function CreateDbDialog({ onDbCreated }: CreateDbDialogProps) {
+function OpenDbDialog({ onDbOpened }: OpenDbProps) {
 
     const { isOpen, onOpen, onClose } = useDisclosure();
     const cancelRef = useRef();
@@ -21,7 +21,7 @@ function CreateDbDialog({ onDbCreated }: CreateDbDialogProps) {
     const [ permission, setPermission ] = useControllableState<DBPermission | ''>({ defaultValue: DBPermission.public });
 
 
-    const handleCreate = async () => {
+    const handleOpenDb = async () => {
         try {
 
             if (!db || !dbType || !permission)
@@ -29,7 +29,7 @@ function CreateDbDialog({ onDbCreated }: CreateDbDialogProps) {
 
             const hash = await createDatabase(db, dbType, permission);
             onClose();
-            onDbCreated(hash);
+            onDbOpened(hash);
         }
         catch (error: any) {
             console.error("handleCreate.errors : ", { error });
@@ -44,11 +44,11 @@ function CreateDbDialog({ onDbCreated }: CreateDbDialogProps) {
     return (
         <>
             <Button
-                variant={"solid"}
-                colorScheme='teal'
+                variant={"ghost"}
+                colorScheme='blue'
                 onClick={onOpen}
             >
-                New Database
+                Open Database
             </Button>
             <AlertDialog
                 isOpen={isOpen}
@@ -59,7 +59,7 @@ function CreateDbDialog({ onDbCreated }: CreateDbDialogProps) {
                 <AlertDialogOverlay>
                     <AlertDialogContent>
                         <AlertDialogHeader fontSize='lg' fontWeight='bold'>
-                            Create Database
+                            Connect to Database
                         </AlertDialogHeader>
                         <ModalCloseButton />
                         <AlertDialogBody>
@@ -82,7 +82,7 @@ function CreateDbDialog({ onDbCreated }: CreateDbDialogProps) {
                                     >
                                         {DbTypeExtendedDescription.map((item) => (
                                             <option key={item.type} value={item.type}>{`${item.type} : ${item.description}`}</option>
-                                        ))}                                        
+                                        ))}
                                     </Select>
                                 </FormControl>
                                 <FormControl id="permission">
@@ -106,17 +106,17 @@ function CreateDbDialog({ onDbCreated }: CreateDbDialogProps) {
                             </Button>
                             <Button
                                 colorScheme='teal'
-                                onClick={handleCreate}
+                                onClick={handleOpenDb}
                                 ml={3}
                             >
-                                Create
+                                Connect
                             </Button>
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialogOverlay>
             </AlertDialog>
         </>
-    )
+    );
 }
 
-export default CreateDbDialog
+export default OpenDbDialog
