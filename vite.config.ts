@@ -196,7 +196,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
+      '@': path.resolve(__dirname, './src/*'),
       stream: "stream-browserify",
       path: 'rollup-plugin-node-polyfills/polyfills/path',
     }
