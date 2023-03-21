@@ -6,20 +6,19 @@ import {
 
 import { showAlert } from "src/utils/SweetAlert2";
 import { createDatabase } from 'src/lib/db';
+import { MapOrbitDbEntry } from "src/lib/mapper";
+import { useAppDbDispatch } from "src/context/dbs-reducer";
 import { DBType, DBPermission, DbTypeExtendedDescription, DBPermissionExtendedDescription } from 'src/lib/types';
 
-type CreateDbDialogProps = {
-    onDbCreated: (hash: string) => void;
-}
 
-function CreateDbDialog({ onDbCreated }: CreateDbDialogProps) {
+function CreateDbDialog() {
 
+    const dispatch = useAppDbDispatch();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const cancelRef = useRef();
     const [ db, setDb ] = useControllableState({ defaultValue: 'counter' });
     const [ dbType, setDbType ] = useControllableState<DBType | ''>({ defaultValue: DBType.counter });
     const [ permission, setPermission ] = useControllableState<DBPermission | ''>({ defaultValue: DBPermission.public });
-
 
     const handleCreate = async () => {
         try {
@@ -27,9 +26,15 @@ function CreateDbDialog({ onDbCreated }: CreateDbDialogProps) {
             if (!db || !dbType || !permission)
                 throw new Error('Please fill all fields');
 
-            const hash = await createDatabase(db, dbType, permission);
+            const { db: newDb } = await createDatabase(db, dbType, permission);
+            console.log(`🐛  -> 🔥 :  handleCreate 🔥 :  newDb:`, newDb);
+
+            dispatch({
+                type: "added",
+                db: MapOrbitDbEntry(newDb)
+            });
+
             onClose();
-            onDbCreated(hash);
         }
         catch (error: any) {
             console.error("handleCreate.errors : ", { error });

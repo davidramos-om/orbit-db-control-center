@@ -1,19 +1,25 @@
 import { Button } from "@chakra-ui/react"
 
+import { ShowLoading, StopLoading } from "src/utils/SweetAlert2";
 import { getAllDatabases } from "src/lib/db"
-import { ShowLoading, StopLoading } from "../utils/SweetAlert2";
+import { MapOrbitDbEntry } from "src/lib/mapper";
+import { useAppDbDispatch } from "src/context/dbs-reducer";
 
-type Props = {
-    onProgramsLoaded: (programs: LogEntry<any>[]) => void;
-}
+export default function RegreshDataBases() {
 
-export default function RegreshDataBases({ onProgramsLoaded }: Props) {
+    const dispatch = useAppDbDispatch();
 
     const handleRegresh = async () => {
         try {
             ShowLoading({ title: 'Refreshing DataBases' });
-            const dbs = await getAllDatabases();
-            onProgramsLoaded(dbs);
+            const entries = await getAllDatabases();
+            const dbs = entries.map((db: any) => { return MapOrbitDbEntry(db) });
+
+            dispatch({
+                type: 'init',
+                dbs,
+            });
+
             StopLoading();
         }
         catch (error) {

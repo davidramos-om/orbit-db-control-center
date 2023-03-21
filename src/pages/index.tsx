@@ -1,32 +1,17 @@
-import { useEffect, useState } from 'react'
-import { Box, Divider, Spacer, Stack, Text } from '@chakra-ui/react';
+import { Box, Divider, Stack, Text } from '@chakra-ui/react';
 
-import useIsMounted from 'src/hooks/useIsMounted';
-import CreateDbDialog from "src/blocks/CreateDB";
+import CreateDataBase from "src/blocks/CreateDB";
 import RegreshDataBases from "src/blocks/RefreshDBs";
-import OpenDbDialog from "src/blocks/OpenDB";
+import OpenDataBase from "src/blocks/OpenDB";
+
 import DataBaseList, { DBRow } from "src/blocks/DbList";
-import { getAllDatabases } from "src/lib/db";
 import { MapOrbitDbEntry } from "src/lib/mapper";
+import { useAppDb } from "src/context/dbs-reducer";
 
 const HomePage = () => {
 
-    const [ dbs, setDbs ] = useState<LogEntry<any>[]>([]);
-    const isMounted = useIsMounted();
-
-    useEffect(() => {
-        getDbs();
-    }, []);
-
-
-    const getDbs = async () => {
-
-        const _dbs = await getAllDatabases();
-        if (isMounted())
-            setDbs(_dbs);
-    }
-
-    const _rows = dbs.map((db) => {
+    const { dbs } = useAppDb();
+    const rows = dbs.map((db) => {
 
         const entry = MapOrbitDbEntry(db);
 
@@ -40,7 +25,6 @@ const HomePage = () => {
         }
 
         return _r;
-
     });
 
     return (
@@ -49,17 +33,16 @@ const HomePage = () => {
         >
             <Text as="b">DATABASES:</Text>
             <Stack direction={[ 'column', 'row' ]}>
-                <CreateDbDialog onDbCreated={getDbs} />
-                <RegreshDataBases onProgramsLoaded={setDbs} />
-                <OpenDbDialog onDbOpened={getDbs} />                
+                <CreateDataBase />
+                <RegreshDataBases />
+                <OpenDataBase onDbOpened={() => { }} />                
             </Stack>
             <br />
             <Divider color="white" borderColor={"gray.500"} />
             <br />
             <Stack>
-                <DataBaseList dbs={_rows} />
+                <DataBaseList dbs={rows} />
             </Stack>
-
         </Box>
     );
 }

@@ -45,6 +45,15 @@ export const getAllDatabases = async () => {
   return programs ? programs.iterator({ limit: -1 }).collect() : []
 }
 
+export const getProgramByHash = (multiHash: string) => {
+
+  if (!programs && orbitdb) {
+
+  }
+
+  return null;
+}
+
 export const getDB = async (address: string) => {
 
   let db = null;
@@ -122,15 +131,17 @@ export const createDatabase = async (name: string, type: DBType, permissions: DB
       throw new Error('Invalid database type');
   }
 
-  console.log({ db });
-
-
-  return programs.add({
+  const hash = programs.add({
     name,
     type,
     address: db.address.toString(),
     added: Date.now()
-  })
+  });
+
+  return {
+    db,
+    hash
+  };
 }
 
 export const removeDatabase = async (hash: string) => {

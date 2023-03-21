@@ -11,15 +11,21 @@ import { ChakraProvider } from '@chakra-ui/react'
 // globalThis.Buffer = BufferPolyfill
 // console.log('buffer', Buffer.from('foo', 'hex'))
 
-import App from './App'
 import './index.css'
+import App from './App'
+import { AppLogProvider } from "./context/logs-reducer";
+import { AppDbProvider } from "./context/dbs-reducer";
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <ChakraProvider>
+      <AppLogProvider>
+        <AppDbProvider>
       <Router>
         <App />
-      </Router>
+          </Router>
+        </AppDbProvider>
+      </AppLogProvider>
     </ChakraProvider>
   </React.StrictMode>,
 )

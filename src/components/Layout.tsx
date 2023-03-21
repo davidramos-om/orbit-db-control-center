@@ -2,6 +2,7 @@ import { Avatar, Box, Button, Divider, Flex, Heading, HStack, Link, Spacer, Text
 import { Link as Reactink } from 'react-router-dom'
 
 import ColorModeToggle from 'src/components/ThemeMode';
+import AppLogs from 'src/blocks/AppLogs';
 import { Systems } from "./Systems";
 
 type Props = {
@@ -53,10 +54,11 @@ const HeaderLayout = ({ children }: Props) => {
             <Box
                 bg={bg}
                 p={4}
-                height="full"
+                // height="calc(100vh - 200px)"
             >
                 {children}
             </Box>
+            <AppLogs />
         </Flex>
     );
 }
