@@ -11,6 +11,7 @@ import { useAppDb } from "src/context/dbs-reducer";
 const HomePage = () => {
 
     const { dbs } = useAppDb();
+
     const rows = dbs.map((db) => {
 
         const entry = MapOrbitDbEntry(db);
@@ -28,20 +29,19 @@ const HomePage = () => {
     });
 
     return (
-        <Box
-            id="home-page"
-        >
-            <Text as="b">DATABASES:</Text>
-            <Stack direction={[ 'column', 'row' ]}>
-                <CreateDataBase />
-                <RegreshDataBases />
-                <OpenDataBase onDbOpened={() => { }} />                
-            </Stack>
-            <br />
-            <Divider color="white" borderColor={"gray.500"} />
-            <br />
-            <Stack>
-                <DataBaseList dbs={rows} />
+        <Box id="home-page" >
+            <Stack
+                spacing={4}
+            >
+                <Text as="b">DATABASES:</Text>
+                <Stack direction={[ 'column', 'row' ]}>
+                    <CreateDataBase />
+                    <RegreshDataBases />
+                    <OpenDataBase onDbOpened={() => { }} />
+                </Stack>
+                <Stack>
+                    <DataBaseList dbs={rows} />
+                </Stack>
             </Stack>
         </Box>
     );

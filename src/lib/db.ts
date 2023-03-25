@@ -1,5 +1,4 @@
 import OrbitDB from 'orbit-db';
-import type FeedStore from "orbit-db-feedstore";
 import { type IPFS, create as createIPFSInstance } from 'ipfs-core';
 
 import config from './ipfs-config'
@@ -47,8 +46,17 @@ export const getAllDatabases = async () => {
 
 export const getProgramByHash = (multiHash: string) => {
 
-  if (!programs && orbitdb) {
+  if (programs && orbitdb) {
 
+    const db = programs.iterator({ limit: -1 }).collect().find((db: any) => db.hash === multiHash);
+    if (db) {
+      return {
+        name: db.payload.value.name,
+        type: db.payload.value.type,
+        address: db.payload.value.address,
+        added: db.payload.value.added
+      }
+    }
   }
 
   return null;
@@ -63,6 +71,80 @@ export const getDB = async (address: string) => {
   }
 
   return db
+}
+
+
+type fetchDbOptions = {
+  limit?: number;
+  lte?: string;
+  lt?: string;
+  gte?: string;
+  gt?: string;
+  reverse?: boolean;
+  docsOptions?: {
+    fullOp: boolean;
+  }
+}
+
+export const fetchDb = async (address: string, options: fetchDbOptions) => {
+
+  const db = await getDB(address);
+  console.log(`🐛  -> 🔥 :  fetchDb 🔥 :  db:`, db);
+
+  if (!db)
+    return null;
+
+  const { limit = 10, reverse = true, docsOptions } = options || {};
+  const { fullOp = false } = docsOptions || {};
+
+  switch (db.type) {
+    case 'feed':
+      return db.iterator({ limit }).collect();
+    case 'eventlog':
+      return db.iterator({ limit }).collect();
+    case 'docstore':
+      return db.query((e: any) => e !== null, { fullOp: fullOp });
+    case 'keyvalue':
+      return Object.keys(db.all).map(e => ({ payload: { value: { key: e, value: db.get(e) } } }));
+    case 'counter':
+      return db.value || 0;
+    default:
+      return null;
+  }
+}
+
+//add an options type, depending on the db type, the entry will be different, if type is keyvalue, entry will be { key: string, value: any }, if type is counter, entry must be a number, etc
+type addEntryOptions = {
+  pin: boolean;
+  entry: Record<string, any>;
+}
+
+
+export const addEntry = async (address: string, options: addEntryOptions) => {
+
+  const db = await getDB(address);
+  if (!db)
+    return null;
+
+  //check if the entry is valid, depending on the db type
+  const { pin = false, entry } = options || {};
+  const { key, value } = entry || {};
+
+  switch (db.type) {
+    case 'feed':
+      return db.put(key, value, { pin });
+    case 'eventlog':
+      return db.add(key, value, { pin });
+    case 'docstore':
+      return db.put(entry);
+    case 'keyvalue':
+      return db.put(entry.key, entry.value);
+    case 'counter':
+      return db.inc(value);
+    default:
+      return null;
+  }
+
 }
 
 export const addDatabase = async (address: string) => {
@@ -106,8 +188,6 @@ export const createDatabase = async (name: string, type: DBType, permissions: DB
       accessController = { write: [ orbitdb.identity.id ] }
       break
   }
-
-  // const db = await orbitdb.create(name, type, { accessController })
 
   let db = null;
 

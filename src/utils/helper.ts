@@ -1,3 +1,5 @@
+import { v4 } from 'uuid';
+
 export function isValidOrbitPublicKey(key: string): boolean {
 
     if (typeof key !== 'string')
@@ -17,4 +19,8 @@ export function isValidOrbitPublicKey(key: string): boolean {
     }
 
     return true;
+}
+
+export function v4Id(): string {
+    return v4();
 }
