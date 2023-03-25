@@ -8,12 +8,14 @@ import { showAlert } from "src/utils/SweetAlert2";
 import { createDatabase } from 'src/lib/db';
 import { MapOrbitDbEntry } from "src/lib/mapper";
 import { useAppDbDispatch } from "src/context/dbs-reducer";
+import { useAppLogDispatch } from "../context/logs-reducer";
 import { DBType, DBPermission, DbTypeExtendedDescription, DBPermissionExtendedDescription } from 'src/lib/types';
 
 
 function CreateDbDialog() {
 
     const dispatch = useAppDbDispatch();
+    const logDispatch = useAppLogDispatch();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const cancelRef = useRef();
     const [ db, setDb ] = useControllableState({ defaultValue: 'counter' });
@@ -27,17 +29,31 @@ function CreateDbDialog() {
                 throw new Error('Please fill all fields');
 
             const { db: newDb } = await createDatabase(db, dbType, permission);
-            console.log(`🐛  -> 🔥 :  handleCreate 🔥 :  newDb:`, newDb);
-
+            const dbEntry = MapOrbitDbEntry(newDb);
             dispatch({
                 type: "added",
-                db: MapOrbitDbEntry(newDb)
+                db: dbEntry
+            });
+
+            logDispatch({
+                log: {
+                    id: dbEntry.payload.value.address,
+                    text: `Created new database ${dbEntry.payload.value.name}`,
+                    type: 'created'
+                }
             });
 
             onClose();
         }
         catch (error: any) {
-            console.error("handleCreate.errors : ", { error });
+
+            logDispatch({
+                log: {
+                    text: `Failed to create database ${db} : ${error?.message || 'Something went wrong'}`,
+                    type: 'error'
+                }
+            });
+
             showAlert({
                 title: '',
                 text: error?.message || 'Something went wrong',

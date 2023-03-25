@@ -1,13 +1,15 @@
-import { Accordion, AccordionItem, AccordionButton, Box, AccordionIcon, AccordionPanel, useColorModeValue, HStack, Text } from '@chakra-ui/react'
+import { Accordion, AccordionItem, AccordionButton, Box, Flex, AccordionIcon, AccordionPanel, useColorModeValue, HStack, Text } from '@chakra-ui/react'
 
 import { TreeDotsHorizontalSvgIcon } from "src/components/TreeDotsHorizontalSvgIcon";
 import { useAppLog } from "src/context/logs-reducer";
+import { sentenseCase } from "src/utils/helper";
 
 
 type Colors = {
     [ key: string ]: string
 }
 
+const exludeTypes = [ 'error', 'none', 'preview', 'synced', 'pinned', 'connected', 'disconnected', 'connecting' ];
 export const Colors: Colors = {
     'created': 'green',
     'updated': 'blue',
@@ -15,16 +17,19 @@ export const Colors: Colors = {
     'synced': 'purple',
     'pinned': 'orange',
     'preview': 'gray',
+    'error': 'red',
+    'connected': 'green',
+    'disconnected': 'red',
+    'connecting': 'yellow',
     'none': 'yellow'
 }
-
 
 export default function AppLogs() {
 
     const { logs } = useAppLog();
     const bg = useColorModeValue('gray.300', 'blackAlpha.900');
-    const itemsBg = useColorModeValue('gray.100', 'gray.900');
-    const titleColor = useColorModeValue('gray.900', 'gray.100');
+    const itemsBg = useColorModeValue('gray.800', 'gray.900');
+    const titleColor = useColorModeValue('gray.400', 'gray.100');
 
     return (
         <Accordion
@@ -52,20 +57,26 @@ export default function AppLogs() {
                     bg={itemsBg}
                 >
                     {logs.map((log) => (
-                        <Box key={log.id}>
+                        <Flex key={log.id}>
                             <Text
                                 as="b"
-                                colorScheme={Colors[ log.type ]}
+                                color={Colors[ log.type ]}
                             >
-                                {log.type}
+                                {`${sentenseCase(log.type)}`}
                             </Text>
                             <Text>
-                                {log.text}
+                                {` : ${log.text} `}
                             </Text>
-                            <Text>
-                                {log.text}
-                            </Text>
-                        </Box>
+                            {exludeTypes.includes(log.type) ? null : (
+                                <Text
+                                    as="b"
+                                    color={Colors[ log.type ]}
+                                    pl={1}
+                                >
+                                    {`- hash : ${log.id}`}
+                                </Text>
+                            )}
+                        </Flex>
 
                     ))}
                 </AccordionPanel>

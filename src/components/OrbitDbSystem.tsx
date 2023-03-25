@@ -4,7 +4,6 @@ import { type IPFS } from "ipfs-core";
 
 import { useAppLogDispatch } from "src/context/logs-reducer";
 import useIsMounted from "src/hooks/useIsMounted";
-import { v4Id } from "src/utils/helper";
 import { SystemState } from "src/lib/types";
 import { initOrbitDB } from "src/lib/db";
 
@@ -31,12 +30,9 @@ export function OrbitDbSystem({ ipfs, onOrbitDbReady }: Props) {
                     return;
 
                 dispatch({
-                    type: 'added',
                     log: {
-                        done: true,
-                        id: v4Id(),
                         text: `Connecting to OrbitDB`,
-                        type: 'created'
+                        type: 'connecting'
                     }
                 });
 
@@ -50,12 +46,9 @@ export function OrbitDbSystem({ ipfs, onOrbitDbReady }: Props) {
                     onOrbitDbReady();
 
                     dispatch({
-                        type: 'added',
                         log: {
-                            done: true,
-                            id: v4Id(),
                             text: `Connected to OrbitDB Id : ${db.id}`,
-                            type: 'created'
+                            type: 'connected'
                         }
                     });
                 }
@@ -66,12 +59,9 @@ export function OrbitDbSystem({ ipfs, onOrbitDbReady }: Props) {
 
                 setDbState(() => SystemState.error);
                 dispatch({
-                    type: 'added',
                     log: {
-                        done: true,
-                        id: v4Id(),
                         text: `Error connecting to OrbitDB : ${error.message}`,
-                        type: 'created'
+                        type: 'error'
                     }
                 });
             }

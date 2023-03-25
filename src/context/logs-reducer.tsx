@@ -1,14 +1,14 @@
 import { type ReactNode, createContext, useContext, useReducer } from 'react';
+import { v4Id } from "src/utils/helper";
 
 type DbLog = {
-    id: string;
-    type: 'created' | 'updated' | 'deleted' | 'synced' | 'pinned' | 'preview'
+    id?: string;
+    type: 'created' | 'updated' | 'deleted' | 'synced' | 'pinned' | 'preview' | 'error' | 'connected' | 'disconnected' | 'connecting'
     text: string;
-    done: boolean
+    date?: Date;
 };
 
 type ReducerAction = {
-    type: 'added' | 'changed' | 'deleted';
     log: DbLog;
 }
 
@@ -24,27 +24,13 @@ const AppLogDispatchContext = createContext<React.Dispatch<ReducerAction>>(() =>
 
 function logReducer(records: DbLog[], action: ReducerAction): DbLog[] {
 
-    switch (action.type) {
-        case 'added': {
-            return [ ...records, action.log ];
+    return [ ...records,
+        {
+            ...action.log,
+            date: action.log.date || new Date(),
+            id: action.log.id || v4Id()
         }
-        case 'changed': {
-            return records.map(t => {
-
-                if (t.id === action.log.id) {
-                    return action.log;
-                } else {
-                    return t;
-                }
-            });
-        }
-        case 'deleted': {
-            return records.filter(t => t.id !== action.log.id);
-        }
-        default: {
-            throw Error('Unknown action: ' + action.type);
-        }
-    }
+    ];
 }
 
 

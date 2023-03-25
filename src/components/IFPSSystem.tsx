@@ -6,7 +6,6 @@ import { useAppLogDispatch } from "src/context/logs-reducer";
 import useIsMounted from "src/hooks/useIsMounted";
 import { SystemState } from "src/lib/types";
 import { initIPFS } from "src/lib/db";
-import { v4Id } from "src/utils/helper";
 
 import { SytemStatusIcon } from "./SytemStatusIcon";
 
@@ -27,12 +26,9 @@ export function IFPSSystem({ onIpfsReady }: Props) {
             try {
 
                 dispatch({
-                    type: 'added',
                     log: {
-                        done: true,
-                        id: v4Id(),
                         text: `Connecting to IPFS node`,
-                        type: 'created'
+                        type: 'connecting'
                     }
                 });
 
@@ -46,12 +42,9 @@ export function IFPSSystem({ onIpfsReady }: Props) {
                     onIpfsReady(ipfs);
 
                     dispatch({
-                        type: 'added',
                         log: {
-                            done: true,
-                            id: v4Id(),
                             text: `Connected to IPFS`,
-                            type: 'created'
+                            type: 'connected'
                         }
                     });
                 }
@@ -62,12 +55,9 @@ export function IFPSSystem({ onIpfsReady }: Props) {
 
                 setDbState(() => SystemState.error);
                 dispatch({
-                    type: 'added',
                     log: {
-                        done: true,
-                        id: v4Id(),
                         text: `Error connecting to IPFS : ${error.message}`,
-                        type: 'created'
+                        type: 'error'
                     }
                 });
             }

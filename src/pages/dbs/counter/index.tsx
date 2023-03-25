@@ -5,7 +5,7 @@ import { Box, Card, CardBody, CardHeader, Heading, Stack, Text } from "@chakra-u
 import DbHeaderCard from "src/blocks/DbHeader";
 import { useAppLogDispatch } from "src/context/logs-reducer";
 import Incrementer from "./Incrementer";
-import { addEntry, fetchDb, getDB } from "src/lib/db";
+import { addEntry, fetchDb } from "src/lib/db";
 import { showAlert } from "src/utils/SweetAlert2";
 import { useAppDb } from "src/context/dbs-reducer";
 
@@ -31,7 +31,6 @@ export default function CounterDbPage() {
         const counter = await fetchDb(dbEntry.payload.value.address, {});
         setCounter(Number(counter || 0));
 
-
     }, [ dbEntry ]);
 
     const handleIncrement = async (value: number) => {
@@ -49,9 +48,7 @@ export default function CounterDbPage() {
 
         const hash = await addEntry(dbEntry?.payload.value.address, { pin: false, entry: { value: value } });
         dispatch({
-            type: 'added',
             log: {
-                done: true,
                 id: hash,
                 text: `Incremented counter by ${value}`,
                 type: 'created'

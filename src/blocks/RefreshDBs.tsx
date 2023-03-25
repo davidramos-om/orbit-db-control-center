@@ -4,13 +4,16 @@ import { ShowLoading, StopLoading } from "src/utils/SweetAlert2";
 import { getAllDatabases } from "src/lib/db"
 import { MapOrbitDbEntry } from "src/lib/mapper";
 import { useAppDbDispatch } from "src/context/dbs-reducer";
+import { useAppLogDispatch } from "src/context/logs-reducer";
 
 export default function RegreshDataBases() {
 
     const dispatch = useAppDbDispatch();
+    const logDispatch = useAppLogDispatch();
 
     const handleRegresh = async () => {
         try {
+
             ShowLoading({ title: 'Refreshing DataBases' });
             const entries = await getAllDatabases();
             const dbs = entries.map((db: any) => { return MapOrbitDbEntry(db) });
@@ -20,10 +23,24 @@ export default function RegreshDataBases() {
                 dbs,
             });
 
+            logDispatch({
+                log: {
+                    text: `Refreshed DataBases`,
+                    type: 'synced'
+                }
+            });
+
             StopLoading();
         }
-        catch (error) {
+        catch (error: any) {
             StopLoading();
+            logDispatch({
+                log: {
+                    text: `Failed to refresh DataBases : ${error?.message || 'Something went wrong'}`,
+                    type: 'error'
+                }
+            });
+
         }
     }
 

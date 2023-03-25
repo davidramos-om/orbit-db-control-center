@@ -24,3 +24,7 @@ export function isValidOrbitPublicKey(key: string): boolean {
 export function v4Id(): string {
     return v4();
 }
+
+export function sentenseCase(str: string): string {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
