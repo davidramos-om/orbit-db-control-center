@@ -219,7 +219,9 @@ export default defineConfig({
   //   }
   //},
   plugins: [
-    react(),
+    react({
+      include: "**/*.tsx"
+    }),
     tsconfigPaths(),
     Pages({ dirs: 'src/pages' }),
   ],
