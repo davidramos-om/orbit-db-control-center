@@ -1,7 +1,7 @@
 import { type ReactNode, createContext, useContext, useReducer } from 'react';
 
 type DbLog = {
-    id: number;
+    id: string;
     type: 'created' | 'updated' | 'deleted' | 'synced' | 'pinned' | 'preview'
     text: string;
     done: boolean
@@ -16,14 +16,7 @@ type ContextStructure = {
     logs: DbLog[]
 }
 
-const InitialState: DbLog[] = [
-    {
-        id: 1,
-        type: 'created',
-        text: 'Connecting to 12D3KooWEWaPCZdZLg6PQ5V9y6VzT8ZVVUM3XtA7jyi9dF4ec4eV',
-        done: false
-    }
-];
+const InitialState: DbLog[] = [];
 
 
 const AppLogContext = createContext<ContextStructure>({ logs: InitialState });

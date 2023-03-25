@@ -8,13 +8,14 @@ type ReducerAction = {
 }
 
 type ContextStructure = {
-    dbs: DBEntry[]
+    dbs: DBEntry[],
+    findDb: (hash: string) => DBEntry | undefined;
 }
 
 const InitialState: DBEntry[] = [];
 
 
-const AppDbContext = createContext<ContextStructure>({ dbs: InitialState });
+const AppDbContext = createContext<ContextStructure>({ dbs: InitialState, findDb: () => undefined });
 const AppDbDispatchContext = createContext<React.Dispatch<ReducerAction>>(() => { });
 
 function logsReducer(dbs: DBEntry[], action: ReducerAction): DBEntry[] {
@@ -65,9 +66,19 @@ export function AppDbProvider({ children }: { children: ReactNode }) {
 
     const [ dbs, dispatch ] = useReducer(logsReducer, InitialState);
 
+
+    const findDb = (hash: string) => {
+
+        if (!hash)
+            return undefined;
+
+        return dbs.find((db) => db.hash === hash);
+    }
+
     return (
         <AppDbContext.Provider value={{
-            dbs
+            dbs,
+            findDb
         }}>
             <AppDbDispatchContext.Provider value={dispatch}>
                 {children}

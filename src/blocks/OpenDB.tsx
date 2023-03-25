@@ -27,7 +27,7 @@ function OpenDbDialog({ onDbOpened }: OpenDbProps) {
             if (!db || !dbType || !permission)
                 throw new Error('Please fill all fields');
 
-            const hash = await createDatabase(db, dbType, permission);
+            const { hash } = await createDatabase(db, dbType, permission);
             onClose();
             onDbOpened(hash);
         }
