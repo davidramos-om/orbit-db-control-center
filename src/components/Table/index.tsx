@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Table, Thead, Tbody, Tr, Th, Td, TableCaption, TableContainer } from '@chakra-ui/react';
+import { Table, Thead, Tbody, Tr, Th, Td, TableCaption, TableContainer, useColorModeValue } from '@chakra-ui/react';
 
 import { ShortDateDividerHelper } from "src/utils/date-service";
 
@@ -25,26 +25,41 @@ type DataTableProps = {
 
 export default function DataTable({ rows, keyField, columns, caption = { title: '', placement: "top", show: true } }: DataTableProps) {
 
+    const bgHeader = useColorModeValue('gray.100', 'gray.800');
+    const headerBorderColor = useColorModeValue('gray.300', 'gray.600');
+    const bgRow = useColorModeValue('white', 'gray.700');
+
     return (
-        <TableContainer>
+        <TableContainer
+        >
             <Table
                 variant='simple'
+                colorScheme="blackAlpha"
             >
                 {caption.show && (
                     <TableCaption placement={caption.placement}>
                         {caption.title}
                 </TableCaption>
                 )}
-                <Thead>
-                    <Tr>
+                <Thead
+                    bg={bgHeader}
+                    borderColor={headerBorderColor}
+                    borderWidth={"thin"}
+                    borderStyle={"solid"}
+                >
+                    <Tr
+                    >
                         {columns.map((column) => (
                             <Th key={column.name}>{column.headerNode || column.name}</Th>
                         ))}
                     </Tr>
                 </Thead>
                 <Tbody>
-                    {rows.map((row) => (
-                        <Tr key={row[ keyField ]}>
+                    {rows.map((row, index) => (
+                        <Tr
+                            key={row[ keyField ]}
+                            bg={bgRow}
+                        >
                             {columns.map((column) => (
                                 <Td key={`${row[ keyField ]}_${column.name}`}>
                                     {column.type === 'node' && (column.renderRowNode ? column.renderRowNode(row) : row[ column.selector ])}
