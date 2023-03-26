@@ -26,13 +26,14 @@ export function IFPSSystem({ onIpfsReady }: Props) {
             try {
 
                 dispatch({
+                    type: 'add',
                     log: {
                         text: `Connecting to IPFS node`,
                         type: 'connecting'
                     }
                 });
 
-                const ipfs = await initIPFS();
+                const ipfs = await initIPFS() as any;
 
                 if (!isMounted())
                     return;
@@ -42,6 +43,7 @@ export function IFPSSystem({ onIpfsReady }: Props) {
                     onIpfsReady(ipfs);
 
                     dispatch({
+                        type: 'add',
                         log: {
                             text: `Connected to IPFS`,
                             type: 'connected'
@@ -55,6 +57,7 @@ export function IFPSSystem({ onIpfsReady }: Props) {
 
                 setDbState(() => SystemState.error);
                 dispatch({
+                    type: 'add',
                     log: {
                         text: `Error connecting to IPFS : ${error.message}`,
                         type: 'error'

@@ -9,6 +9,7 @@ type DbLog = {
 };
 
 type ReducerAction = {
+    type: 'add' | 'clear'
     log: DbLog;
 }
 
@@ -24,13 +25,20 @@ const AppLogDispatchContext = createContext<React.Dispatch<ReducerAction>>(() =>
 
 function logReducer(records: DbLog[], action: ReducerAction): DbLog[] {
 
-    return [ ...records,
-        {
-            ...action.log,
-            date: action.log.date || new Date(),
-            id: action.log.id || v4Id()
+
+    switch (action.type) {
+        case 'clear':
+            return [];
+        case 'add': {
+            return [ ...records,
+            {
+                ...action.log,
+                date: action.log.date || new Date(),
+                id: action.log.id || v4Id()
+            }
+            ];
         }
-    ];
+    }
 }
 
 

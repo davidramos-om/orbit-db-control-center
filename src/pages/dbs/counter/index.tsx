@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from 'react-router-dom';
-import { Box, Card, CardBody, CardHeader, Heading, Stack, Text } from "@chakra-ui/react";
+import { Card, CardBody, CardHeader, Heading, Stack, Text } from "@chakra-ui/react";
 
 import DbHeaderCard from "src/blocks/DbHeader";
-import { useAppLogDispatch } from "src/context/logs-reducer";
-import Incrementer from "./Incrementer";
-import { addEntry, fetchDb } from "src/lib/db";
 import { showAlert } from "src/utils/SweetAlert2";
 import { useAppDb } from "src/context/dbs-reducer";
+import { useAppLogDispatch } from "src/context/logs-reducer";
+import { addEntry, fetchEntries } from "src/lib/db";
+
+import IncrementerControl from "./IncrementerController";
 
 export default function CounterDbPage() {
 
@@ -28,7 +29,7 @@ export default function CounterDbPage() {
         if (!dbEntry)
             return;
 
-        const counter = await fetchDb(dbEntry.payload.value.address, {});
+        const counter = await fetchEntries(dbEntry.payload.value.address, {});
         setCounter(Number(counter || 0));
 
     }, [ dbEntry ]);
@@ -48,9 +49,10 @@ export default function CounterDbPage() {
 
         const hash = await addEntry(dbEntry?.payload.value.address, { pin: false, entry: { value: value } });
         dispatch({
+            type: 'add',
             log: {
                 id: hash,
-                text: `Incremented counter by ${value}`,
+                text: `Incremented counter by ${value} on \`${dbEntry?.payload.value.name}\` db`,
                 type: 'created'
             }
         });
@@ -60,7 +62,11 @@ export default function CounterDbPage() {
 
     return (
         <Stack spacing={4}>
-            <DbHeaderCard multiHash={id || ''} />
+            <DbHeaderCard
+                multiHash={id || ''}
+                entriesCount={counter}
+                showEntriesCount={true}
+            />
             <Card
             >
                 <CardHeader>
@@ -73,9 +79,9 @@ export default function CounterDbPage() {
                     <Heading fontSize={"sm"} mb={2}>
                         Increment the value of the counter by:
                     </Heading>
-                    <Incrementer onIncrement={handleIncrement} />
+                    <IncrementerControl onIncrement={handleIncrement} />
                 </CardBody>
             </Card>
-        </Stack >
+        </Stack>
     );
 }

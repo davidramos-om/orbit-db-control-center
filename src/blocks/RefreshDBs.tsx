@@ -24,6 +24,7 @@ export default function RegreshDataBases() {
             });
 
             logDispatch({
+                type: 'add',
                 log: {
                     text: `Refreshed DataBases`,
                     type: 'synced'
@@ -35,6 +36,7 @@ export default function RegreshDataBases() {
         catch (error: any) {
             StopLoading();
             logDispatch({
+                type: 'add',
                 log: {
                     text: `Failed to refresh DataBases : ${error?.message || 'Something went wrong'}`,
                     type: 'error'

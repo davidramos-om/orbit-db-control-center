@@ -30,6 +30,7 @@ export function OrbitDbSystem({ ipfs, onOrbitDbReady }: Props) {
                     return;
 
                 dispatch({
+                    type: 'add',
                     log: {
                         text: `Connecting to OrbitDB`,
                         type: 'connecting'
@@ -46,6 +47,7 @@ export function OrbitDbSystem({ ipfs, onOrbitDbReady }: Props) {
                     onOrbitDbReady();
 
                     dispatch({
+                        type: 'add',
                         log: {
                             text: `Connected to OrbitDB Id : ${db.id}`,
                             type: 'connected'
@@ -59,6 +61,7 @@ export function OrbitDbSystem({ ipfs, onOrbitDbReady }: Props) {
 
                 setDbState(() => SystemState.error);
                 dispatch({
+                    type: 'add',
                     log: {
                         text: `Error connecting to OrbitDB : ${error.message}`,
                         type: 'error'
