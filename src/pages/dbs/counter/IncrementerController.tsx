@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button, Input, Stack } from "@chakra-ui/react";
 
 type IncrementerProps = {
     onIncrement: (value: number) => void
 }
 
-export default function Incrementer({ onIncrement }: IncrementerProps) {
+export default function IncrementerController({ onIncrement }: IncrementerProps) {
 
     const [ value, setValue ] = useState(1);
 
