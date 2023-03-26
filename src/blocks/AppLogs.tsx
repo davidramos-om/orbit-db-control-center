@@ -1,4 +1,5 @@
 import { Accordion, AccordionItem, AccordionButton, Box, Flex, AccordionIcon, AccordionPanel, useColorModeValue, HStack, Text } from '@chakra-ui/react'
+import { useEffect, useRef } from "react";
 
 import { TreeDotsHorizontalSvgIcon } from "src/components/TreeDotsHorizontalSvgIcon";
 import { useAppLog } from "src/context/logs-reducer";
@@ -29,15 +30,33 @@ export default function AppLogs() {
     const { logs } = useAppLog();
     const bg = useColorModeValue('gray.300', 'blackAlpha.900');
     const itemsBg = useColorModeValue('gray.800', 'gray.900');
-    const titleColor = useColorModeValue('gray.400', 'gray.100');
+    const itemsColor = useColorModeValue('gray.400', 'gray.100');
+    const accordingColor = useColorModeValue('gray.900', 'gray.100');
+    const panelRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+
+        if (!panelRef.current)
+            return;
+
+        panelRef.current.scrollTop = panelRef.current.scrollHeight;
+
+    }, [ logs.length ]);
 
     return (
         <Accordion
+            id="app-logs"
             allowToggle
             bg={bg}
+            position="fixed"
+            bottom={0}
+            left={0}
+            right={0}
+            overflowY="auto"
+
         >
             <AccordionItem
-                color={titleColor}
+                color={accordingColor}
             >
                 <h2>
                     <AccordionButton>
@@ -53,11 +72,19 @@ export default function AppLogs() {
                     </AccordionButton>
                 </h2>
                 <AccordionPanel
+                    ref={panelRef}
                     pb={4}
                     bg={itemsBg}
+                    color={itemsColor}
+                    id="app-logs-accordion-panel"
+                    maxH="300px"
+                    minH="300px"
+                    overflowY="auto"
                 >
                     {logs.map((log) => (
-                        <Flex key={log.id}>
+                        <Flex
+                            key={log.id}
+                        >
                             <Text
                                 as="b"
                                 color={Colors[ log.type ]}
