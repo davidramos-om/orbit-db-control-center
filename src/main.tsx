@@ -22,8 +22,8 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <ChakraProvider theme={theme}>
       <AppLogProvider>
         <AppDbProvider>
-      <Router>
-        <App />
+          <Router>
+            <App />
           </Router>
         </AppDbProvider>
       </AppLogProvider>
