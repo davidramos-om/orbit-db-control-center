@@ -14,10 +14,11 @@ type DbDetails = {
 }
 
 type Props = {
+    showEntriesCount?: boolean;
     db?: DbDetails
 }
 
-export default function DbInformation({ db }: Props) {
+export default function DbInformation({ db, showEntriesCount = true }: Props) {
 
     return (
         <Card variant={"elevated"}>
@@ -37,9 +38,11 @@ export default function DbInformation({ db }: Props) {
                             {db?.type || 'none'}
                         </Badge>
                     </Text>
+                    {showEntriesCount && (
                     <Text py='0.5'>
                         Entries : <b> {db?.entriesCount || '0'}</b>
-                    </Text>
+                        </Text>
+                    )}
                 </Stack>
             </CardBody>
         </Card>

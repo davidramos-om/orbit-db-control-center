@@ -6,9 +6,11 @@ import DbInformation from "./DbInformation";
 
 type Props = {
     multiHash: string;
+    entriesCount: number;
+    showEntriesCount?: boolean;
 }
 
-export default function DbHeaderCard({ multiHash }: Props) {
+export default function DbHeaderCard({ multiHash, entriesCount, showEntriesCount }: Props) {
     const { findDb } = useAppDb();
     const db = findDb(multiHash);
 
@@ -16,10 +18,11 @@ export default function DbHeaderCard({ multiHash }: Props) {
         <Stack spacing={4}>
             <DbGoBack />
             <DbInformation
+                showEntriesCount={showEntriesCount}
                 db={{
                     address: db?.payload.value.address || '',
                     name: db?.payload.value.name || '',
-                    entriesCount: 0,
+                    entriesCount: entriesCount || 0,
                     permissions: [],
                     type: db?.payload.value.type || 'none'
                 }}

@@ -34,7 +34,11 @@ const HeaderLayout = ({ children }: Props) => {
                         textDecoration="none"
                     >
                         <HStack p='2'>
-                            <Avatar size="md" name="Control Center" src="./orbit-db.png" />
+                            <Avatar
+                                size="md"
+                                name="Orbit"
+                                src="/orbit-db.png"
+                            />
                             <Heading>
                                 OrbitDB Control Center
                             </Heading>

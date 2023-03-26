@@ -9,7 +9,11 @@ export default function KeyValueDbPage() {
 
     return (
         <Stack spacing={4}>
-            <DbHeaderCard multiHash={id} />
+            <DbHeaderCard
+                multiHash={id || ''}
+                entriesCount={0}
+                showEntriesCount={true}
+            />
         </Stack >
     );
 }

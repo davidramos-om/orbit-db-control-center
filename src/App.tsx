@@ -5,7 +5,6 @@ import { Suspense, useEffect } from 'react'
 
 import Layout from "src/components/Layout";
 import { getAllDatabases } from "src/lib/db";
-import useIsMounted from "src/hooks/useIsMounted";
 import { useAppDbDispatch } from "src/context/dbs-reducer";
 
 import { routes } from "./routes";
