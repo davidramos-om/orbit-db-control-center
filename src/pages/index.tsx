@@ -1,4 +1,4 @@
-import { Box, Divider, Stack, Text } from '@chakra-ui/react';
+import { Box, Stack, Text } from '@chakra-ui/react';
 
 import CreateDataBase from "src/blocks/CreateDB";
 import RegreshDataBases from "src/blocks/RefreshDBs";

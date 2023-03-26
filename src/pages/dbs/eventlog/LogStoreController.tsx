@@ -8,9 +8,10 @@ import { addEntry } from "src/lib/db";
 
 type Props = {
     onRefresh: () => void;
+    onAddEvent: (hash: string) => void;
 }
 
-export default function EventLogStoreController({ onRefresh }: Props) {
+export default function EventLogStoreController({ onRefresh, onAddEvent }: Props) {
 
     const [ value, setValue ] = useState('');
     const { id } = useParams();
@@ -28,12 +29,15 @@ export default function EventLogStoreController({ onRefresh }: Props) {
             if (!dbEntry)
                 return;
 
-            const hash = await addEntry(dbEntry?.payload.value.address, {
-                pin: false, entry: {
-                    value: value,
-                    timestamp: Date.now()
-                }
-            });
+            //* This is the data we want to add to the db, it up to you to shape it, here is an example:
+            const input = {
+                value: value,
+                timestamp: Date.now()
+            }
+
+            const hash = await addEntry(dbEntry?.payload.value.address, { pin: false, entry: input });
+
+            onAddEvent(hash);
             dispatch({
                 type: 'add',
                 log: {

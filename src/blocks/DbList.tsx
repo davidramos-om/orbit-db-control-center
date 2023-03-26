@@ -25,7 +25,7 @@ type Colors = {
     [ key: string ]: string
 }
 
-export const Colors: Colors = {
+export const colorSchema: Colors = {
     'feed': 'green',
     'eventlog': 'blue',
     'keyvalue': 'purple',
@@ -60,7 +60,7 @@ const getColumns = ({ onDelete, onOpen }: getColumnsArgs): DataColumn[] => {
         type: 'node',
         renderRowNode: (row: any) => <Badge
             variant="subtle"
-            colorScheme={Colors[ row.type ] || 'yellow'}
+            colorScheme={colorSchema[ row.type ] || 'yellow'}
         >
             {row.type}
         </Badge>
@@ -130,7 +130,7 @@ export default function DataBaseList({ dbs = [] }: Props) {
             return;
 
         navigate(url);
-    }, []);    
+    }, [ navigate ]);    
 
     const columns = useMemo(() => getColumns({ onDelete: handleDelete, onOpen: handleOpen }), [ handleDelete, handleOpen ]);
 

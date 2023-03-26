@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
-import { Badge, Card, CardBody, CardHeader, Heading, Stack, StackDivider, Text } from "@chakra-ui/react";
+import { Badge, Card, CardBody, CardHeader, Heading, Stack, Text } from "@chakra-ui/react";
 
-import { DBEntry, DBType } from "src/lib/types";
-import { Colors } from './DbList'
+import { DBType } from "src/lib/types";
+import { colorSchema } from './DbList'
 
 
 type DbDetails = {
@@ -33,7 +32,7 @@ export default function DbInformation({ db, showEntriesCount = true }: Props) {
                     <Text py='0.5'>
                         Type : <Badge
                             variant="subtle"
-                            colorScheme={Colors[ db?.type || 'none' ] || 'yellow'}
+                            colorScheme={colorSchema[ db?.type || 'none' ] || 'yellow'}
                         >
                             {db?.type || 'none'}
                         </Badge>
