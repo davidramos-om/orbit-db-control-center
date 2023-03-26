@@ -9,12 +9,57 @@ export let orbitdb: any | null = null; //* OrbitDB instance
 export let programs: any | null = null; //* Programs database
 export let ipfs: IPFS | null = null; //* IPFS instance
 
+let starting_ipfs = false;
+
+
+//* ---------------------- T Y P E S ---------------------- *//
+
+type addEntryOptions = {
+  pin: boolean;
+  entry: Record<string, any>;
+}
+
+type fetchQueryOptions = {
+  limit?: number;
+  lte?: string;
+  lt?: string;
+  gte?: string;
+  gt?: string;
+  reverse?: boolean;
+}
+
+type fetchDbOptions = {
+  dbInstance?: any,
+  hash?: string;
+  query?: fetchQueryOptions;
+  docsOptions?: {
+    fullOp: boolean;
+  }
+}
+
+
+//* ----------------------  F U N C T I O N S ---------------------- *//
+
 export const initIPFS = async () => {
 
   if (ipfs)
     return ipfs
 
+  if (starting_ipfs)
+
+    return new Promise((resolve, reject) => {
+      const interval = setInterval(() => {
+        if (ipfs) {
+          clearInterval(interval);
+          resolve(ipfs)
+        }
+      }, 100)
+    })
+
+  starting_ipfs = true;
   ipfs = await createIPFSInstance(config.ipfs);
+  starting_ipfs = false;
+
   return ipfs
 }
 
@@ -73,52 +118,48 @@ export const getDB = async (address: string) => {
   return db
 }
 
-
-type fetchDbOptions = {
-  limit?: number;
-  lte?: string;
-  lt?: string;
-  gte?: string;
-  gt?: string;
-  reverse?: boolean;
-  docsOptions?: {
-    fullOp: boolean;
+export const fetchEntries = async (
+  address: string,
+  options: fetchDbOptions = {
+    dbInstance: null,
+    hash: '',
+    docsOptions: {
+      fullOp: false
+    },
+    query: {
+      limit: 10,
+      gt: '',
+      gte: '',
+      lt: '',
+      lte: '',
+      reverse: true
   }
-}
+  }) => {
 
-export const fetchDb = async (address: string, options: fetchDbOptions) => {
+  const { dbInstance, docsOptions, query } = options;
+  const { fullOp = false } = docsOptions || {};
 
-  const db = await getDB(address);
-  console.log(`🐛  -> 🔥 :  fetchDb 🔥 :  db:`, db);
-
+  const db = await dbInstance ? await new Promise((resolve) => resolve(dbInstance)) : await getDB(address);
   if (!db)
     return null;
 
-  const { limit = 10, reverse = true, docsOptions } = options || {};
-  const { fullOp = false } = docsOptions || {};
-
   switch (db.type) {
     case 'feed':
-      return db.iterator({ limit }).collect();
+      return await db.iterator(query).collect();
     case 'eventlog':
-      return db.iterator({ limit }).collect();
+      const _entries = await db.iterator(query).collect();
+      return _entries;
     case 'docstore':
-      return db.query((e: any) => e !== null, { fullOp: fullOp });
+      return await db.query((e: any) => e !== null, { fullOp: fullOp });
     case 'keyvalue':
-      return Object.keys(db.all).map(e => ({ payload: { value: { key: e, value: db.get(e) } } }));
+      const all = await db.all;
+      return Object.keys(all).map(e => ({ payload: { value: { key: e, value: db.get(e) } } }));
     case 'counter':
       return db.value || 0;
     default:
       return null;
   }
 }
-
-//add an options type, depending on the db type, the entry will be different, if type is keyvalue, entry will be { key: string, value: any }, if type is counter, entry must be a number, etc
-type addEntryOptions = {
-  pin: boolean;
-  entry: Record<string, any>;
-}
-
 
 export const addEntry = async (address: string, options: addEntryOptions) => {
 
@@ -128,13 +169,21 @@ export const addEntry = async (address: string, options: addEntryOptions) => {
 
   //check if the entry is valid, depending on the db type
   const { pin = false, entry } = options || {};
-  const { key, value } = entry || {};
+  // const { key, value } = entry || {};
+
+  // get the key and value from a Record<string, any>
+  const key = Object.keys(entry)[ 0 ];
+  const value = entry[ key ];
+
+  console.log(`🐛  -> 🔥 :  addEntry 🔥 :  value:`, value);
+  console.log(`🐛  -> 🔥 :  addEntry 🔥 :  key:`, key);
+
 
   switch (db.type) {
     case 'feed':
-      return db.put(key, value, { pin });
+      return db.put(entry, value, { pin });
     case 'eventlog':
-      return db.add(key, value, { pin });
+      return db.add(entry, { pin });
     case 'docstore':
       return db.put(entry);
     case 'keyvalue':
