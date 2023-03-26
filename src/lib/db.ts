@@ -118,6 +118,28 @@ export const getDB = async (address: string) => {
   return db
 }
 
+export const fetchEntry = async (address: string, likeMultiHashOrKey: string) => {
+
+  const db = await getDB(address);
+  if (!db)
+    return null;
+
+  switch (db.type) {
+    case 'feed':
+      return await db.get(likeMultiHashOrKey);
+    case 'eventlog':
+      return await db.get(likeMultiHashOrKey);
+    case 'docstore':
+      return await db.get(likeMultiHashOrKey);
+    case 'keyvalue':
+      return await db.get(likeMultiHashOrKey);
+    case 'counter':
+      return db.value || 0;
+    default:
+      return null;
+  }
+}
+
 export const fetchEntries = async (
   address: string,
   options: fetchDbOptions = {
@@ -167,17 +189,9 @@ export const addEntry = async (address: string, options: addEntryOptions) => {
   if (!db)
     return null;
 
-  //check if the entry is valid, depending on the db type
   const { pin = false, entry } = options || {};
-  // const { key, value } = entry || {};
-
-  // get the key and value from a Record<string, any>
   const key = Object.keys(entry)[ 0 ];
   const value = entry[ key ];
-
-  console.log(`🐛  -> 🔥 :  addEntry 🔥 :  value:`, value);
-  console.log(`🐛  -> 🔥 :  addEntry 🔥 :  key:`, key);
-
 
   switch (db.type) {
     case 'feed':
@@ -193,7 +207,6 @@ export const addEntry = async (address: string, options: addEntryOptions) => {
     default:
       return null;
   }
-
 }
 
 export const addDatabase = async (address: string) => {

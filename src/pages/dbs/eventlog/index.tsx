@@ -5,7 +5,7 @@ import { Card, CardHeader, CardBody, Heading, Stack } from "@chakra-ui/react";
 import DbHeaderCard from "src/blocks/DbHeader";
 import { useAppDb } from "src/context/dbs-reducer";
 import useIsMounted from "src/hooks/useIsMounted";
-import { fetchEntries } from "src/lib/db";
+import { fetchEntries, fetchEntry } from "src/lib/db";
 import { ShowLoading, StopLoading } from "src/utils/SweetAlert2";
 
 import EventLogStoreControl from './LogStoreController';
@@ -27,16 +27,23 @@ export default function EventLogDbPage() {
             if (!dbAddress)
                 return;
 
-            ShowLoading({});
+            ShowLoading({
+                title: 'Loading event log...',
+            });
             const _entries = await fetchEntries(dbAddress, { query: { reverse: true, limit: -1 } });
             if (!_entries)
                 return;
 
-            const data = _entries.map((e: any) => ({
-                id: String(e.hash),
-                date: new Date(e.payload.value?.timestamp || 0),
-                value: String(e.payload.value?.value || e.payload.value)
-            }));
+            const data = _entries.map((e: any) => {
+
+                const _log: EventLogModel = {
+                    id: String(e.hash),
+                    date: new Date(e.payload.value?.timestamp || 0),
+                    value: String(e.payload.value?.value || e.payload.value)
+                };
+
+                return _log;
+            });
 
             if (!isMounted())
                 return;
@@ -58,7 +65,7 @@ export default function EventLogDbPage() {
         finally {
             StopLoading();
         }
-    }, [ dbAddress ]);
+    }, [ dbAddress, isMounted ]);
 
     useEffect(() => {
         fetchData(false);
@@ -73,6 +80,37 @@ export default function EventLogDbPage() {
             console.error(error);
         }
     }, [ fetchData ]);
+
+    const handleAddEvent = useCallback(async (hash: string) => {
+        try {
+
+            if (!dbAddress)
+                return;
+
+            if (!hash)
+                return;
+
+            const entry = await fetchEntry(dbAddress, hash);
+            if (!entry)
+                return;
+
+            const _log: EventLogModel = {
+                id: String(entry.hash),
+                date: new Date(entry.payload.value?.timestamp || 0),
+                value: String(entry.payload.value?.value || entry.payload.value)
+            };
+
+            setEntries((prev) => {
+                return [
+                    _log,
+                    ...prev
+                ]
+            });
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }, [ dbAddress ]);
 
 
     return (
@@ -89,6 +127,7 @@ export default function EventLogDbPage() {
                         Add an immutable event to the log
                     </Heading>
                     <EventLogStoreControl
+                        onAddEvent={handleAddEvent}
                         onRefresh={handleRefresh}
                     />
                     <br />
