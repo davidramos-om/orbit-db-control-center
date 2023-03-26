@@ -166,10 +166,11 @@ import react from '@vitejs/plugin-react'
 import tsconfigPaths from 'vite-tsconfig-paths';
 import Pages from 'vite-plugin-pages'
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
-import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
+// import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
 import path from 'path';
 import inject from '@rollup/plugin-inject';
 import rollupNodePolyFill from 'rollup-plugin-node-polyfills';
+import eslint from 'vite-plugin-eslint';
 
 
 // https://vitejs.dev/config/
@@ -222,6 +223,7 @@ export default defineConfig({
     react({
       include: "**/*.tsx"
     }),
+    eslint(),
     tsconfigPaths(),
     Pages({ dirs: 'src/pages' }),
   ],
