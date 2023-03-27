@@ -39,7 +39,8 @@ export default function EventLogDbPage() {
                 const _log: EventLogModel = {
                     id: String(e.hash),
                     date: new Date(e.payload.value?.timestamp || 0),
-                    value: String(e.payload.value?.value || e.payload.value)
+                    value: String(e.payload.value?.value || e.payload.value),
+                    payload: e
                 };
 
                 return _log;
@@ -97,7 +98,8 @@ export default function EventLogDbPage() {
             const _log: EventLogModel = {
                 id: String(entry.hash),
                 date: new Date(entry.payload.value?.timestamp || 0),
-                value: String(entry.payload.value?.value || entry.payload.value)
+                value: String(entry.payload.value?.value || entry.payload.value),
+                payload: entry
             };
 
             setEntries((prev) => {

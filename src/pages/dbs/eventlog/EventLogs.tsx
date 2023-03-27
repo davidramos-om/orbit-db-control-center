@@ -2,10 +2,13 @@ import { forwardRef } from 'react'
 import { TableVirtuoso } from "react-virtuoso";
 import { Table, Thead, Tbody, Tr, Th, Td, TableCaption, TableContainer, useColorModeValue } from '@chakra-ui/react';
 
+import ShowEntryPayload from 'src/blocks/ShowPayload';
+
 export type EventLogModel = {
     id: string;
     date: Date;
     value: string;
+    payload: any;
 }
 
 type Props = {
@@ -35,18 +38,24 @@ export default function EventLogs({ entries }: Props) {
                 <Tr
                     bg={trBg}
                 >
-                    <Th w={100}>#</Th>
+                    <Th w={100} textAlign="center" >#</Th>
+                    <Th w={50} textAlign="center">{`{ }`}</Th>
                     <Th w={200}>Id</Th>
                     <Th w={230}>Date</Th>
-                    <Th w="calc(100% - 530px)">Value</Th>
+                    <Th w="calc(100% - 580px)">Value</Th>
                 </Tr>
             )}
             itemContent={(index, log: EventLogModel) => (
                 <>
                     <Td w={100} textAlign="center" > {index}</Td>
-                    <Td w={200}>{log.id}</Td>
+                    <Td w={50} textAlign="center" >
+                        <ShowEntryPayload payload={log.payload} />
+                    </Td>
+                    <Td w={200}>
+                        {log.id}
+                    </Td>
                     <Td w={230}>{log.date.toLocaleString()}</Td>
-                    <Td w="calc(100% - 530px)">{log.value}</Td>
+                    <Td w="calc(100% - 580px)">{log.value}</Td>
                 </>
             )}
         />
