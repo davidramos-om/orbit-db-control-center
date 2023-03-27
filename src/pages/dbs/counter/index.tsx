@@ -19,11 +19,6 @@ export default function CounterDbPage() {
 
     const [ counter, setCounter ] = useState(0);
 
-    useEffect(() => {
-        readCounter();
-    }, []);
-
-
     const readCounter = useCallback(async () => {
 
         if (!dbEntry)
@@ -33,6 +28,11 @@ export default function CounterDbPage() {
         setCounter(Number(counter || 0));
 
     }, [ dbEntry ]);
+
+    useEffect(() => {
+        readCounter();
+    }, [ readCounter ]);
+
 
     const handleIncrement = async (value: number) => {
 

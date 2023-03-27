@@ -175,7 +175,7 @@ export const fetchEntries = async (
       return await db.query((e: any) => e !== null, { fullOp: fullOp });
     case 'keyvalue':
       const all = await db.all;
-      return Object.keys(all).map(e => ({ payload: { value: { key: e, value: db.get(e) } } }));
+      return Object.keys(all).map(e => ({ payload: { key: e, value: db.get(e) } }));
     case 'counter':
       return db.value || 0;
     default:
@@ -201,7 +201,13 @@ export const addEntry = async (address: string, options: addEntryOptions) => {
     case 'docstore':
       return db.put(entry);
     case 'keyvalue':
-      return db.put(entry.key, entry.value);
+
+      if (!entry.key)
+        return Promise.reject('Key is required for keyvalue database');
+      const theKey = entry.key;
+      const _entry = { ...entry };
+      delete _entry[ 'key' ];
+      return db.put(theKey, _entry);
     case 'counter':
       return db.inc(value);
     default:

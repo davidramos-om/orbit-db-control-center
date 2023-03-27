@@ -72,7 +72,7 @@ export function OrbitDbSystem({ ipfs, onOrbitDbReady }: Props) {
 
         setTimeout(() => { init(); }, 1500);
 
-    }, [ ipfs ]);
+    }, [ ipfs, dispatch, isMounted, onOrbitDbReady ]);
 
     return (
         <SytemStatusIcon label="OrbitDB" color={color} />

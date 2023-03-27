@@ -68,7 +68,7 @@ export function IFPSSystem({ onIpfsReady }: Props) {
 
         setTimeout(() => { init(); }, 1500);
 
-    }, []);
+    }, [ dispatch, isMounted, onIpfsReady ]);
 
     return (
         <SytemStatusIcon label="IPFS" color={color} />
