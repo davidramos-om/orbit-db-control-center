@@ -11,7 +11,7 @@ type Colors = {
 }
 
 const exludeTypes = [ 'error', 'none', 'preview', 'synced', 'pinned', 'connected', 'disconnected', 'connecting' ];
-export const Colors: Colors = {
+export const colorSchema: Colors = {
     'created': 'green',
     'updated': 'blue',
     'deleted': 'red',
@@ -87,7 +87,7 @@ export default function AppLogs() {
                         >
                             <Text
                                 as="b"
-                                color={Colors[ log.type ]}
+                                color={colorSchema[ log.type ]}
                             >
                                 {`${sentenseCase(log.type)}`}
                             </Text>
@@ -97,7 +97,7 @@ export default function AppLogs() {
                             {exludeTypes.includes(log.type) ? null : (
                                 <Text
                                     as="b"
-                                    color={Colors[ log.type ]}
+                                    color={colorSchema[ log.type ]}
                                     pl={1}
                                 >
                                     {`- hash : ${log.id}`}
