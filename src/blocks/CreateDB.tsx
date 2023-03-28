@@ -36,6 +36,7 @@ function CreateDbDialog() {
             });
 
             logDispatch({
+                type: 'add',
                 log: {
                     id: dbEntry.payload.value.address,
                     text: `Created new database ${dbEntry.payload.value.name}`,
@@ -48,6 +49,7 @@ function CreateDbDialog() {
         catch (error: any) {
 
             logDispatch({
+                type: 'add',
                 log: {
                     text: `Failed to create database ${db} : ${error?.message || 'Something went wrong'}`,
                     type: 'error'

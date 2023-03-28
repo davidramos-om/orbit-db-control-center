@@ -16,7 +16,10 @@ export function initDbSystem(): Promise<{ ipfs: IPFS, orbitdb: OrbitDB }> {
                 if (!db)
                     reject('OrbitDB not initialized');
 
-                resolve({ ipfs: ifps, orbitdb: db });
+                resolve({
+                    ipfs: ifps as IPFS,
+                    orbitdb: db
+                });
             }
             else {
                 reject('IPFS not initialized');
