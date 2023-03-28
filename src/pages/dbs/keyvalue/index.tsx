@@ -1,4 +1,4 @@
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useState, useMemo, useEffect } from "react";
 import { useParams } from 'react-router-dom';
 import { Card, CardHeader, CardBody, Heading, Stack } from "@chakra-ui/react";
 
@@ -67,6 +67,11 @@ export default function KeyValueDbPage() {
             StopLoading();
         }
     }, [ dbAddress, isMounted ]);
+
+    useEffect(() => {
+        fetchData(false);
+    }, [ fetchData ]);
+
 
     const handleRefresh = useCallback(async () => {
         try {

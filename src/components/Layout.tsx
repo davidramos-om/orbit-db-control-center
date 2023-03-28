@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, Divider, Flex, Heading, HStack, Link, Spacer, Text, useColorModeValue, chakra } from "@chakra-ui/react";
+import { Avatar, Box, Divider, Flex, Heading, HStack, Link, Spacer, Text, useColorModeValue, chakra } from "@chakra-ui/react";
 import { Link as Reactink } from 'react-router-dom'
 
 import ColorModeToggle from 'src/components/ThemeMode';
@@ -46,7 +46,7 @@ const HeaderLayout = ({ children }: Props) => {
                     </Link>
                     <Spacer />
                     <ColorModeToggle />
-                    <Button colorScheme='teal'>Connect Wallet</Button>
+                    {/* <Button colorScheme='teal'>Connect Wallet</Button> */}
                 </Flex>
                 <Divider />
                 <Flex
