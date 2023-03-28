@@ -168,10 +168,12 @@ import Pages from 'vite-plugin-pages'
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
 // import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
 import path from 'path';
-import inject from '@rollup/plugin-inject';
+// import Inject from '@rollup/plugin-inject';
 import rollupNodePolyFill from 'rollup-plugin-node-polyfills';
 import eslint from 'vite-plugin-eslint';
 
+
+// const _inject = Inject({ buffer: [ 'nanoid', 'nanoid' ] });
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -186,12 +188,15 @@ export default defineConfig({
     rollupOptions: {
       plugins: [
         rollupNodePolyFill(),
-        inject({
-          include: [ 'node_modules/**' ],
-          modules: {
-            Buffer: [ 'buffer', 'Buffer' ],
-          }
-        })
+        // inject({
+        //   include: [ 'node_modules/**' ],
+        // }),
+        // inject({
+        //   include: [ 'node_modules/**' ],
+        //   modules: {
+        //     Buffer: [ 'buffer', 'Buffer' ],
+        //   }
+        // })
       ],
     },
   },
