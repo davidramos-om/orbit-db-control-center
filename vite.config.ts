@@ -7,8 +7,8 @@ import eslint from 'vite-plugin-eslint';
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 //! NOTES : ABOUT POLYFILL fs, process, buffer for orbit-db and ipfs
-//* - nodePolyfills from "vite-plugin-node-stdlib-browser" works well for development, but not for build
-//* - nodePolyfills from "vite-plugin-node-polyfills"  seems to work well for both development and build
+//* - nodePolyfills from "vite-plugin-node-stdlib-browser" works well for development, but not for live
+//* - nodePolyfills from "vite-plugin-node-polyfills"  seems to work well for both development and live 
 //* - it looks like is not needed to set up the esbuildOptions for optimizeDeps
 //* - it looks like is {protocolImports: true} is not needed.
 //* - More complex polyfills using optimizeDeps, build, rollup, etc. did not work for me when it comes to build for production.
