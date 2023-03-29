@@ -11,6 +11,7 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 //* - nodePolyfills from "vite-plugin-node-polyfills"  seems to work well for both development and build
 //* - it looks like is not needed to set up the esbuildOptions for optimizeDeps
 //* - it looks like is {protocolImports: true} is not needed.
+//* - More complex polyfills using optimizeDeps, build, rollup, etc. did not work for me when it comes to build for production.
 
 //! https://vitejs.dev/config/
 
@@ -24,9 +25,9 @@ export default defineConfig({
     react({
       include: "**/*.tsx"
     }),
+    Pages({ dirs: 'src/pages' }),
     eslint(),
     tsconfigPaths(),
-    Pages({ dirs: 'src/pages' }),
     nodePolyfills(),
   ],
 });
