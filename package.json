@@ -18,6 +18,7 @@
     "date-fns": "^2.29.3",
     "eslint": "^8.36.0",
     "eslint-config-react-app": "^7.0.1",
+    "fs": "^0.0.1-security",
     "ipfs-core": "^0.18.0",
     "nanoid": "^4.0.2",
     "node-stdlib-browser": "^1.2.0",
@@ -32,6 +33,7 @@
     "sweetalert2": "^11.7.3",
     "sweetalert2-react-content": "^5.0.7",
     "uuid": "^9.0.0",
+    "vite-plugin-node-polyfills": "^0.7.0",
     "vite-plugin-pages": "^0.29.0",
     "vite-tsconfig-paths": "^4.0.7"
   },
