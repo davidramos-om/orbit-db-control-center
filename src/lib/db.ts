@@ -3,6 +3,7 @@ import { type IPFS, create as createIPFSInstance } from 'ipfs-core';
 
 import config from './ipfs-config'
 import { DBPermission, DBType } from "./types";
+import { AddEntry as AddDocStoreEntry } from "./docs-store";
 
 
 export let orbitdb: any | null = null; //* OrbitDB instance
@@ -199,7 +200,12 @@ export const addEntry = async (address: string, options: addEntryOptions) => {
     case 'eventlog':
       return db.add(entry, { pin });
     case 'docstore':
-      return db.put(entry);
+      // return db.put(entry);
+      return AddDocStoreEntry({
+        dbInstance: db,
+        entry,
+        id: key
+      });
     case 'keyvalue':
 
       if (!entry.key)

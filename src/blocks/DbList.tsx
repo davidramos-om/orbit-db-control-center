@@ -123,6 +123,7 @@ export default function DataBaseList({ dbs = [] }: Props) {
                 url = PATH.DB.COUNTER.replace(':id', row.multiHash).replace(':name', row.name);
                 break;
             case 'docstore':
+            case 'docs':
                 url = PATH.DB.DOCSTORE.replace(':id', row.multiHash).replace(':name', row.name);
                 break;
         };
