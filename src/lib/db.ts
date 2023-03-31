@@ -202,7 +202,7 @@ export const addEntry = async (address: string, options: addEntryOptions) => {
     case 'docstore':
       // return db.put(entry);
       return AddDocStoreEntry({
-        dbInstance: db,
+        docstore: db,
         entry,
         id: key
       });
