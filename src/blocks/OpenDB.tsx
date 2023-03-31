@@ -45,7 +45,7 @@ function OpenDbDialog({ onDbOpened }: OpenDbProps) {
         <>
             <Button
                 variant={"ghost"}
-                colorScheme='blue'
+                colorScheme='pink'
                 onClick={onOpen}
             >
                 Open Database
@@ -105,7 +105,7 @@ function OpenDbDialog({ onDbOpened }: OpenDbProps) {
                                 Cancel
                             </Button>
                             <Button
-                                colorScheme='teal'
+                                colorScheme='pink'
                                 onClick={handleOpenDb}
                                 ml={3}
                             >

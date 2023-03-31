@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useRef } from "react";
 import {
     AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button,
     FormControl, FormLabel, Input, ModalCloseButton, Select, Stack, useControllableState, useDisclosure
@@ -68,7 +68,7 @@ function CreateDbDialog() {
         <>
             <Button
                 variant={"solid"}
-                colorScheme='teal'
+                colorScheme='pink'
                 onClick={onOpen}
             >
                 New Database
@@ -128,7 +128,7 @@ function CreateDbDialog() {
                                 Cancel
                             </Button>
                             <Button
-                                colorScheme='teal'
+                                colorScheme='pink'
                                 onClick={handleCreate}
                                 ml={3}
                             >

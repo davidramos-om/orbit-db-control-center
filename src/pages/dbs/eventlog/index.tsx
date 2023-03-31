@@ -27,9 +27,8 @@ export default function EventLogDbPage() {
             if (!dbAddress)
                 return;
 
-            ShowLoading({
-                title: 'Loading event log...',
-            });
+            ShowLoading({ title: 'Loading event log...' });
+
             const _entries = await fetchEntries(dbAddress, { query: { reverse: true, limit: -1 } });
             if (!_entries)
                 return;
@@ -119,8 +118,8 @@ export default function EventLogDbPage() {
         <Stack spacing={4}>
             <DbHeaderCard
                 multiHash={id || ''}
-                entriesCount={0}
-                showEntriesCount={false}
+                entriesCount={entries.length}
+                showEntriesCount={true}
             />
             <Card
             >

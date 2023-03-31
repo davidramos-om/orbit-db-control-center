@@ -1,7 +1,7 @@
-import { forwardRef } from 'react'
 import { TableVirtuoso } from "react-virtuoso";
-import { Table, Thead, Tbody, Tr, Th, Td, TableCaption, TableContainer, useColorModeValue } from '@chakra-ui/react';
+import { Tr, Th, Td, useColorModeValue } from '@chakra-ui/react';
 
+import { TableComponents } from 'src/components/Table/Virtuoso'
 import ShowEntryPayload from 'src/blocks/ShowPayload';
 
 export type EventLogModel = {
@@ -15,14 +15,6 @@ type Props = {
     entries: EventLogModel[];
 }
 
-const TableComponents = {
-    Table: (props: any) => <Table {...props} />,
-    TableHead: Thead,
-    TableRow: Tr,
-    TableCaption: TableCaption,
-    TableContainer: TableContainer,
-    TableBody: forwardRef((props, ref) => <Tbody {...props} ref={ref as any} />),
-}
 
 export default function EventLogs({ entries }: Props) {
 
@@ -39,10 +31,10 @@ export default function EventLogs({ entries }: Props) {
                     bg={trBg}
                 >
                     <Th w={100} textAlign="center" >#</Th>
-                    <Th w={50} textAlign="center">{`{ }`}</Th>
+                    <Th w={60} textAlign="center">{`{ }`}</Th>
                     <Th w={200}>Id</Th>
                     <Th w={230}>Date</Th>
-                    <Th w="calc(100% - 580px)">Value</Th>
+                    <Th w="calc(100% - 590px)">Value</Th>
                 </Tr>
             )}
             itemContent={(index, log: EventLogModel) => (
@@ -55,7 +47,7 @@ export default function EventLogs({ entries }: Props) {
                         {log.id}
                     </Td>
                     <Td w={230}>{log.date.toLocaleString()}</Td>
-                    <Td w="calc(100% - 580px)">{log.value}</Td>
+                    <Td w="calc(100% - 590px)">{log.value}</Td>
                 </>
             )}
         />
