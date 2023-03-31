@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Input, Stack, Checkbox, InputGroup, InputRightElement, Spacer, Textarea } from "@chakra-ui/react";
+import { Button, useToast, Stack, Checkbox, InputGroup, InputRightElement, Spacer, Textarea } from "@chakra-ui/react";
 
 import { useAppLogDispatch } from "src/context/logs-reducer";
 import { addEntry } from "src/lib/db";
@@ -11,61 +11,64 @@ type Props = {
     dbAddress: string;
     dbName: string;
     onRefresh: () => void;
-    onAddEvent: (hash: string) => void;
+    onEntryAdded: (key: string) => void;
 }
 
-export default function DocStoreController({ dbAddress, dbName, onRefresh, onAddEvent }: Props) {
+export default function DocStoreController({ dbAddress, dbName, onRefresh, onEntryAdded }: Props) {
 
     const [ value, setValue ] = useState('');
     const [ id, setId ] = useState('');
     const [ strictMode, setStrictMode ] = useState(true);
     const [ disableInput, setDisableInput ] = useState(false);
+    const toast = useToast();
 
     const dispatch = useAppLogDispatch();
 
-    const handleAddEvent = async () => {
+    const handleAddEntry = async () => {
 
         try {
-
-            if (!value)
-                return;
 
             if (!dbAddress)
                 return;
 
-            if (!id || !value)
+            if (!id || !value) {
+                toast.closeAll();
+                toast({
+                    position: 'top-right',
+                    description: "Please provide an id and a json document",
+                    status: "error",
+                    isClosable: true,
+                });
                 return;
+            }
 
-            let jsonDocument = value;
 
             if (strictMode && !isValidJson(value)) {
-                dispatch({
-                    type: 'add',
-                    log: {
-                        text: `Failed to add event to \`${dbName}\` db - Invalid JSON`,
-                        type: 'error'
-                    }
+                toast.closeAll();
+                toast({
+                    position: 'top-right',
+                    description: "Invalid JSON",
+                    status: "error",
+                    isClosable: true,
                 });
-
 
                 return;
             }
 
             //* if value is a valid json, parse it, if property "_id" is not set, set it to the id
+            let jsonDocument = {};
             if (isValidJson(value)) {
 
                 const json = JSON.parse(value);
                 if (!json._id)
                     json._id = id;
 
-                jsonDocument = JSON.stringify(json);
+                jsonDocument = { ...json };
             }
             else {
                 const json = { _id: id, value: value };
-                jsonDocument = JSON.stringify(json);
+                jsonDocument = { ...json };
             }
-
-            console.log({ jsonDocument });
 
             //* This is the data we want to add to the db, it up to you to shape it, here is an example:
             const input = {
@@ -76,8 +79,7 @@ export default function DocStoreController({ dbAddress, dbName, onRefresh, onAdd
             }
 
             const hash = await addEntry(dbAddress, { pin: false, entry: input });
-
-            onAddEvent(hash);
+            onEntryAdded(id);
             dispatch({
                 type: 'add',
                 log: {
@@ -103,16 +105,14 @@ export default function DocStoreController({ dbAddress, dbName, onRefresh, onAdd
     }
 
     return (
-        <Stack
-            spacing={4}
-        >
+        <Stack spacing={4}>
             <Stack
                 spacing={4}
                 direction={{ base: 'column', md: 'row' }}
                 alignContent='center'
                 alignItems="center"
             >
-                <Input
+                <Textarea
                     placeholder="_id"
                     variant={"outline"}
                     value={id}
@@ -175,7 +175,7 @@ export default function DocStoreController({ dbAddress, dbName, onRefresh, onAdd
                 </Button>
                 <Button
                     variant={"outline"}
-                    onClick={handleAddEvent}
+                    onClick={handleAddEntry}
                 >
                     Put Document
                 </Button>
