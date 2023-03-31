@@ -1,19 +1,25 @@
 
+// import type DocStore from 'orbit-db-docstore';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type DocStore<T> = any;
 
 interface AddDocEntryArgs {
-    docstore: any;
-    id: string;
-    entry: Record<string, any>;
+    docstore: DocStore<any>;
+    entry: any;
 }
 
 interface GetDocEntryArgs {
-    docstore: any;
+    docstore: DocStore<any>;
     key: string;
 }
 
 interface QueryDocEntryArgs {
-    docstore: any;
+    docstore: DocStore<any>;
     mapper: (entry: any) => boolean;
+    options?: {
+        fullOp?: boolean;
+    }
 }
 
 function validateParams(params: Record<string, any>) {
@@ -26,39 +32,37 @@ function validateParams(params: Record<string, any>) {
     }
 }
 
-export async function AddEntry({ docstore, id, entry }: AddDocEntryArgs) {
+export async function AddEntry({ docstore, entry }: AddDocEntryArgs) {
 
-    validateParams({ docstore, id, entry });
-
-    const json = JSON.stringify(entry);
-    const hash = await docstore.put(json, id);
-
+    validateParams({ docstore, entry });
+    const hash = await docstore.put(entry);
     return hash;
 }
 
 export function getEntryFromHash({ docstore, key }: GetDocEntryArgs) {
 
     validateParams({ docstore, key });
-
     const entry = docstore.get(key);
-
     return entry;
 }
 
-export function queryEntries({ docstore, mapper }: QueryDocEntryArgs) {
+export function fetchDocEntries({ docstore, key }: GetDocEntryArgs) {
+
+    validateParams({ docstore });
+    const entries = docstore.get(key);
+    return entries;
+}
+
+export function queryEntries({ docstore, options, mapper }: QueryDocEntryArgs) {
 
     validateParams({ docstore, mapper });
-
-    const entries = docstore.query(mapper);
-
+    const entries = docstore.query(mapper, options || {});
     return entries;
 }
 
 export function deleteEntry({ docstore, key }: GetDocEntryArgs) {
 
     validateParams({ docstore, key });
-
     const entry = docstore.del(key);
-
     return entry;
 }

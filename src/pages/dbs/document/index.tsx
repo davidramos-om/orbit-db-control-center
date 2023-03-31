@@ -5,7 +5,7 @@ import { Card, CardHeader, CardBody, Heading, Stack } from "@chakra-ui/react";
 import { useAppDb } from "src/context/dbs-reducer";
 import useIsMounted from "src/hooks/useIsMounted";
 import { ShowLoading, StopLoading } from "src/utils/SweetAlert2";
-import { fetchEntries, fetchEntry } from "src/lib/db";
+import { fetchEntries } from "src/lib/db";
 
 import DbHeaderCard from "src/blocks/DbHeader";
 import DocumentStoreControl from './DocumentStoreController';
@@ -21,23 +21,39 @@ export default function DocumentDbPage() {
     const dbEntry = useMemo(() => findDb(id || ''), [ id, findDb ]);
     const dbAddress = useMemo(() => dbEntry?.payload.value.address, [ dbEntry ]);
 
-    const fetchData = useCallback(async (restar: boolean) => {
+    const fetchData = useCallback(async (restar: boolean, showLoader: boolean) => {
         try {
 
             if (!dbAddress)
                 return;
 
-            ShowLoading({ title: 'Loading docstore log...' });
+            if (showLoader)
+                ShowLoading({ title: 'Loading docstore log...' });
 
-            const _entries = await fetchEntries(dbAddress, { query: { reverse: true, limit: -1 } });
+            const _entries = await fetchEntries(dbAddress, {
+                docsOptions: { fullOp: true },
+                query: { reverse: true, limit: -1 }
+            });
+
             if (!_entries)
                 return;
 
             const data = _entries.map((e: any) => {
+
+                const _entry = e.payload.value || {};
+                let preview = '';
+
+                if (typeof _entry.document !== 'object')
+                    preview = String(_entry.document);
+                else
+                    preview = JSON.stringify(e.payload.value.document, null, 2);
+
+                preview = preview.substring(0, 100) + '...';
+
                 const _log: DocStoreModel = {
-                    id: String(e.payload.value?._id || ''),
-                    date: new Date(e.payload.value?.timestamp || 0),
-                    jsonPreview: String(e.payload.value || '').substring(0, 100),
+                    id: String(_entry._id),
+                    date: new Date(_entry.timestamp || 0),
+                    jsonPreview: preview,
                     payload: e
                 };
 
@@ -68,50 +84,22 @@ export default function DocumentDbPage() {
     }, [ dbAddress, isMounted ]);
 
     useEffect(() => {
-        fetchData(false);
+        fetchData(false, true);
     }, [ fetchData ]);
 
 
     const handleRefresh = useCallback(async () => {
         try {
-            await fetchData(true);
+            await fetchData(true, true);
         }
         catch (error) {
             console.error(error);
         }
     }, [ fetchData ]);
 
-    const handleAddEvent = useCallback(async (hash: string) => {
-        try {
-
-            if (!dbAddress)
-                return;
-
-            if (!hash)
-                return;
-
-            const entry = await fetchEntry(dbAddress, hash);
-            if (!entry)
-                return;
-
-            const _log: DocStoreModel = {
-                id: String(entry.hash),
-                date: new Date(entry.payload.value?.timestamp || 0),
-                jsonPreview: String(entry.payload.value || '').substring(0, 100),
-                payload: entry
-            };
-
-            setEntries((prev) => {
-                return [
-                    _log,
-                    ...prev
-                ]
-            });
-        }
-        catch (error) {
-            console.error(error);
-        }
-    }, [ dbAddress ]);
+    const handleEntryAdded = useCallback(() => {
+        fetchData(true, false);
+    }, [ fetchData ]);
 
     return (
         <Stack spacing={4}>
@@ -126,7 +114,7 @@ export default function DocumentDbPage() {
                         Add a document to the database
                     </Heading>
                     <DocumentStoreControl
-                        onAddEvent={handleAddEvent}
+                        onEntryAdded={handleEntryAdded}
                         onRefresh={handleRefresh}
                         dbAddress={dbAddress || ''}
                         dbName={dbEntry?.payload.value.name || ''}
@@ -134,7 +122,10 @@ export default function DocumentDbPage() {
                     <br />
                 </CardHeader>
                 <CardBody>
-                    <DocumentLogs entries={entries || []} />
+                    <DocumentLogs
+                        dbAddress={dbAddress || ''}
+                        entries={entries || []}
+                    />
                 </CardBody>
             </Card>
         </Stack >

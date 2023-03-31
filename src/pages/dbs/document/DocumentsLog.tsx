@@ -1,8 +1,8 @@
-import { Tr, Th, Td, useColorModeValue } from "@chakra-ui/react";
 import { TableVirtuoso } from "react-virtuoso";
+import { Tr, Th, useColorModeValue } from "@chakra-ui/react";
 
 import { TableComponents } from 'src/components/Table/Virtuoso';
-import ShowEntryPayload from 'src/blocks/ShowPayload';
+import { RowItem } from "./RowItem";
 
 export type DocStoreModel = {
     id: string;
@@ -12,10 +12,11 @@ export type DocStoreModel = {
 }
 
 type Props = {
+    dbAddress: string;
     entries: DocStoreModel[];
 }
 
-export default function DocumentsLog({ entries }: Props) {
+export default function DocumentsLog({ dbAddress, entries }: Props) {
 
     const trBg = useColorModeValue('gray.200', 'gray.800');
 
@@ -36,18 +37,13 @@ export default function DocumentsLog({ entries }: Props) {
                     <Th w="calc(100% - 590px)">Value</Th>
                 </Tr>
             )}
-            itemContent={(index, log: DocStoreModel) => (
-                <>
-                    <Td w={100} textAlign="center" > {index}</Td>
-                    <Td w={50} textAlign="center" >
-                        <ShowEntryPayload payload={log.payload} />
-                    </Td>
-                    <Td w={200}>
-                        {log.id}
-                    </Td>
-                    <Td w={230}>{log.date.toLocaleString()}</Td>
-                    <Td w="calc(100% - 590px)">{log.jsonPreview}</Td>
-                </>
+            itemContent={(index, log: DocStoreModel) => ( 
+                <RowItem
+                    key={log.id}
+                    index={index}
+                    dbAddress={dbAddress}
+                    log={log}
+                />
             )}
         />
     );
