@@ -3,7 +3,7 @@ import { type IPFS, create as createIPFSInstance } from 'ipfs-core';
 
 import config from './ipfs-config'
 import { DBPermission, DBType } from "./types";
-import { AddEntry as AddDocStoreEntry } from "./docs-store";
+import { AddEntry as AddDocStoreEntry, queryEntries as fetchDocEntries, deleteEntry as delDocumentEntry } from "./docs-store";
 
 
 export let orbitdb: any | null = null; //* OrbitDB instance
@@ -55,7 +55,7 @@ export const initIPFS = async () => {
           resolve(ipfs)
         }
       }, 100)
-    })
+    });
 
   starting_ipfs = true;
   ipfs = await createIPFSInstance(config.ipfs);
@@ -163,6 +163,7 @@ export const fetchEntries = async (
   const { fullOp = false } = docsOptions || {};
 
   const db = await dbInstance ? await new Promise((resolve) => resolve(dbInstance)) : await getDB(address);
+  console.log('db', db);
   if (!db)
     return null;
 
@@ -173,7 +174,13 @@ export const fetchEntries = async (
       const _entries = await db.iterator(query).collect();
       return _entries;
     case 'docstore':
-      return await db.query((e: any) => e !== null, { fullOp: fullOp });
+      return fetchDocEntries({
+        docstore: db,
+        mapper: (e: any) => e !== null,
+        options: {
+          fullOp: fullOp
+        }
+      });
     case 'keyvalue':
       const all = await db.all;
       return Object.keys(all).map(e => ({ payload: { key: e, value: db.get(e) } }));
@@ -200,11 +207,9 @@ export const addEntry = async (address: string, options: addEntryOptions) => {
     case 'eventlog':
       return db.add(entry, { pin });
     case 'docstore':
-      // return db.put(entry);
       return AddDocStoreEntry({
         docstore: db,
         entry,
-        id: key
       });
     case 'keyvalue':
 
@@ -218,6 +223,31 @@ export const addEntry = async (address: string, options: addEntryOptions) => {
       return db.inc(value);
     default:
       return null;
+  }
+}
+
+export const removeEntry = async (address: string, likeMultiHashOrKey: string) => {
+
+  const db = await getDB(address);
+  if (!db)
+    throw new Error('Database not found');
+
+  switch (db.type) {
+    case 'feed':
+      return db.remove(likeMultiHashOrKey);
+    case 'eventlog':
+      throw new Error('Eventlog database does not support delete operation');
+    case 'docstore':
+      return delDocumentEntry({
+        docstore: db,
+        key: likeMultiHashOrKey
+      });
+    case 'keyvalue':
+      return db.del(likeMultiHashOrKey);
+    case 'counter':
+      throw new Error('Counter database does not support delete operation');
+    default:
+      throw new Error('Database type not supported');
   }
 }
 
@@ -299,5 +329,15 @@ export const createDatabase = async (name: string, type: DBType, permissions: DB
 }
 
 export const removeDatabase = async (hash: string) => {
-  // return programs.remove(hash)
+
+  if (!programs)
+    return Promise.reject('Programs database not initialized');
+
+  const db = programs.iterator({ limit: -1 }).collect().find((db: any) => db.hash === hash);
+  if (db) {
+    await programs.remove(db.hash);
+    return true;
+  }
+
+  return false;
 }
