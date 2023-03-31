@@ -28,3 +28,52 @@ export function v4Id(): string {
 export function sentenseCase(str: string): string {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+export function isValidJson(str: string): boolean {
+    try {
+
+        //validate using regex
+        if (/^[\],:{}\s]*$/.test(str.replace(/\\["\\/bfnrtu]/g, '@')
+            .replace(/["'][^"'\\\n\r]*["']|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?/g, ']')
+            .replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
+            return true;
+        }
+
+        //validate json
+        JSON.parse(str);
+
+    } catch (e) {
+        return false;
+    }
+
+    return true;
+}
+
+export function prettyJson(json: string) {
+
+    try {
+        if (!isValidJson(json))
+            return json;
+
+        return JSON.stringify(JSON.parse(json), null, 2);
+    } catch (error) {
+
+        return json;
+    }
+}
+
+export function prettyJsonOnInput(json: string) {
+
+    //add a format to the string so it can be shown in the input field
+    json = json.replace(/,/g, ', ');
+    json = json.replace(/:/g, ': ');
+    json = json.replace(/{/g, '{ ');
+    json = json.replace(/}/g, ' }');
+    json = json.replace(/\[/g, '[ ');
+    json = json.replace(/\]/g, ' ]');
+    json = json.replace(/"/g, '"');
+    json = json.replace(/'/g, "'");
+    json = json.replace(/\\/g, '\\');
+
+    return json;
+}
