@@ -13,8 +13,6 @@ export const KeyValueDbPage = lazy(() => import('./pages/dbs/keyvalue'));
 
 export const PATH = {
     HOME: '/',
-    ABOUT: '/about',
-    BLOG: '/blog',
     DB: {
         COUNTER: '/db/counter/:id/:name',
         DOCSTORE: '/db/document/:id/:name',
