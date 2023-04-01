@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "rm -rf dist && rm -rf node_modules/.cache/gh-pages && yarn run build",
+    "deploy": "gh-pages -d build"
   },
   "browserslist": "last 1 Chrome version",
   "dependencies": {
