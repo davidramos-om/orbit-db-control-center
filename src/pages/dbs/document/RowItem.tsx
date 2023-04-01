@@ -3,8 +3,8 @@ import { Td, HStack } from "@chakra-ui/react";
 
 import ShowEntryPayload from 'src/blocks/ShowPayload';
 import DeleteEntry from 'src/blocks/DeleteEntryButton';
-import { removeEntry } from 'src/lib/db'
 import { useAppLogDispatch } from 'src/context/logs-reducer';
+import { removeEntry } from 'src/lib/db'
 import { DocStoreModel } from "./DocumentsLog";
 
 export type RowItemProps = {
@@ -32,7 +32,14 @@ export function RowItem({ index, dbAddress, log }: RowItemProps) {
 
             setDeleted(true);
         }
-        catch (error) {
+        catch (error: any) {
+            dispatch({
+                type: 'add',
+                log: {
+                    type: 'error',
+                    text: `Error deleting entry ${log.id} from ${dbAddress}: ${error.message}`
+                }
+            });
         }
     }, [ dbAddress, dispatch, log.id ]);
 
