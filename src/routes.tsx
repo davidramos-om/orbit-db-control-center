@@ -3,9 +3,7 @@ import { RouteObject } from 'react-router-dom';
 
 
 import HomePage from './pages';
-export const AboutPage = lazy(() => import('./pages/about'))
-export const BlogPage = lazy(() => import('./pages/blog'))
-export const NotFoundPage = lazy(() => import('./pages/404'))
+export const NotFoundPage = lazy(() => import('./pages/404'));
 
 export const CounterDbPage = lazy(() => import('./pages/dbs/counter'));
 export const DocumentDbPage = lazy(() => import('./pages/dbs/document'));
@@ -31,16 +29,6 @@ export const routes: RouteObject[] = [
         path: PATH.HOME,
         index: true,
         element: <HomePage />,
-    },
-    {
-        path: PATH.ABOUT,
-        index: true,
-        element: <AboutPage />,
-    },
-    {
-        path: PATH.BLOG,
-        index: true,
-        element: <BlogPage />,
     },
     {
         path: PATH.DB.COUNTER,
