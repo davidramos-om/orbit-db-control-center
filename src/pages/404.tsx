@@ -1,15 +1,9 @@
-import { Outlet } from 'react-router-dom'
-import type { FC } from 'react'
+export default function NotFoundPage() { 
 
-const index: FC = () => {
     return (
         <div>
-            <p>
-                The page you are looking for doesn't exist or an other error occurred.
-            </p>
-            <Outlet />
+            <h1>404</h1>
+            <p>Page not found</p>
         </div>
-    )
+    );
 }
-
-export default index
