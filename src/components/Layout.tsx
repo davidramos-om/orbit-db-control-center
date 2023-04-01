@@ -1,9 +1,10 @@
-import { Avatar, Box, Divider, Flex, Heading, HStack, Link, Spacer, Text, useColorModeValue, chakra } from "@chakra-ui/react";
-import { Link as Reactink } from 'react-router-dom'
+import { Avatar, Box, Divider, Flex, Heading, HStack, Link, Spacer, Text, useColorModeValue, chakra, IconButton } from "@chakra-ui/react";
+import { Link as ReactLink } from 'react-router-dom'
 
 import ColorModeToggle from 'src/components/ThemeMode';
 import AppLogs from 'src/blocks/AppLogs';
 import { Systems } from "./Systems";
+import Iconify from "./SvgIconify";
 
 type Props = {
     children: React.ReactNode
@@ -29,7 +30,7 @@ const HeaderLayout = ({ children }: Props) => {
                     gap='2'
                 >
                     <Link
-                        as={Reactink}
+                        as={ReactLink}
                         to='/'
                         textDecoration="none"
                     >
@@ -46,7 +47,13 @@ const HeaderLayout = ({ children }: Props) => {
                     </Link>
                     <Spacer />
                     <ColorModeToggle />
-                    {/* <Button colorScheme='teal'>Connect Wallet</Button> */}
+                    <IconButton
+                        as={ReactLink}
+                        target="_blank"
+                        to="https://github.com/davidramos-om/orbit-db-control-center"
+                        aria-label="GitHub repository"
+                        icon={<Iconify icon="bi:github" />}
+                    />
                 </Flex>
                 <Divider />
                 <Flex
