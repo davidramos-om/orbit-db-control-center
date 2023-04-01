@@ -1,12 +1,11 @@
 import { useRef } from "react"
 import {
     AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button,
-    FormControl, FormLabel, Input, ModalCloseButton, Select, Stack, useControllableState, useDisclosure
+    FormControl, FormLabel, Input, ModalCloseButton, Stack, useControllableState, useDisclosure, useToast,
 } from "@chakra-ui/react"
 
-import { showAlert } from "src/utils/SweetAlert2";
-import { createDatabase } from 'src/lib/db';
-import { DBType, DBPermission, DbTypeExtendedDescription, DBPermissionExtendedDescription } from 'src/lib/types';
+import { addDatabase } from 'src/lib/db';
+import { useAppLogDispatch } from 'src/context/logs-reducer';
 
 type OpenDbProps = {
     onDbOpened: (hash: string) => void;
@@ -14,29 +13,46 @@ type OpenDbProps = {
 
 function OpenDbDialog({ onDbOpened }: OpenDbProps) {
 
+    const toast = useToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const [ dbAddress, setDbAddress ] = useControllableState({ defaultValue: '' });
     const cancelRef = useRef();
-    const [ db, setDb ] = useControllableState({ defaultValue: 'counter' });
-    const [ dbType, setDbType ] = useControllableState<DBType | ''>({ defaultValue: DBType.counter });
-    const [ permission, setPermission ] = useControllableState<DBPermission | ''>({ defaultValue: DBPermission.public });
-
+    const dispatch = useAppLogDispatch();
 
     const handleOpenDb = async () => {
         try {
 
-            if (!db || !dbType || !permission)
-                throw new Error('Please fill all fields');
+            if (!dbAddress) {
+                toast({
+                    position: 'top',
+                    description: 'Please enter database address',
+                    status: 'error',
+                    isClosable: true,
+                });
+                return;
+            }
 
-            const { hash } = await createDatabase(db, dbType, permission);
+            const { hash } = await addDatabase(dbAddress);
+
+            dispatch({
+                type: 'add',
+                log: {
+                    text: `Connected to database ${dbAddress}`,
+                    type: 'connected',
+                }
+            });
+
             onClose();
             onDbOpened(hash);
         }
         catch (error: any) {
-            console.error("handleCreate.errors : ", { error });
-            showAlert({
-                title: '',
-                text: error?.message || 'Something went wrong',
-                icon: 'error'
+
+            dispatch({
+                type: 'add',
+                log: {
+                    text: `Failed to connect to database ${dbAddress} : ${error?.message || 'Something went wrong'}`,
+                    type: 'error',
+                }
             });
         }
     }
@@ -51,10 +67,11 @@ function OpenDbDialog({ onDbOpened }: OpenDbProps) {
                 Open Database
             </Button>
             <AlertDialog
+                motionPreset='slideInBottom'
                 isOpen={isOpen}
                 leastDestructiveRef={cancelRef as any}
                 onClose={onClose}
-                size='xl'
+                size='xl'                
             >
                 <AlertDialogOverlay>
                     <AlertDialogContent>
@@ -65,37 +82,13 @@ function OpenDbDialog({ onDbOpened }: OpenDbProps) {
                         <AlertDialogBody>
                             <Stack spacing={4}>
                                 <FormControl id="dbname">
-                                    <FormLabel>Database Name</FormLabel>
+                                    <FormLabel>Database Address</FormLabel>
                                     <Input
                                         type="text"
-                                        placeholder="Enter database name"
-                                        value={db}
-                                        onChange={(e) => setDb(e.target.value)}
+                                        placeholder="Enter database address"
+                                        value={dbAddress}
+                                        onChange={(e) => setDbAddress(e.target.value)}
                                     />
-                                </FormControl>
-                                <FormControl id="dbtype">
-                                    <FormLabel>Database type</FormLabel>
-                                    <Select
-                                        placeholder="Select option"
-                                        value={dbType}
-                                        onChange={(e) => setDbType(e.target.value as DBType)}
-                                    >
-                                        {DbTypeExtendedDescription.map((item) => (
-                                            <option key={item.type} value={item.type}>{`${item.type} : ${item.description}`}</option>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                                <FormControl id="permission">
-                                    <FormLabel>Write Permissions</FormLabel>
-                                    <Select
-                                        placeholder="Select option"
-                                        value={permission}
-                                        onChange={(e) => setPermission(e.target.value as DBPermission)}
-                                    >
-                                        {DBPermissionExtendedDescription.map((item) => (
-                                            <option key={item.type} value={item.type}>{`${item.type} : ${item.description}`}</option>
-                                        ))}
-                                    </Select>
                                 </FormControl>
                             </Stack>
                         </AlertDialogBody>
