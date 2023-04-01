@@ -13,6 +13,7 @@
   "dependencies": {
     "@chakra-ui/icons": "^2.0.17",
     "@chakra-ui/react": "^2.5.1",
+    "@iconify/react": "^4.1.0",
     "date-fns": "^2.29.3",
     "eslint": "^8.36.0",
     "eslint-config-react-app": "^7.0.1",
