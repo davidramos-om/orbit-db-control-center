@@ -1,0 +1,1 @@
+import{a as e,a5 as s,a6 as T,n as r,a7 as b,a8 as l,r as t,a9 as n}from"./index-7258077c.js";const p={Table:a=>e(s,{...a}),TableHead:T,TableRow:r,TableCaption:b,TableContainer:l,TableBody:t.forwardRef((a,o)=>e(n,{...a,ref:o}))};export{p as T};
