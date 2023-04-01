@@ -1,34 +1,46 @@
 import { useRef } from "react";
 import {
     AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button,
-    FormControl, FormLabel, Input, ModalCloseButton, Select, Stack, useControllableState, useDisclosure
+    FormControl, FormLabel, Input, ModalCloseButton, Select, Stack, useControllableState, useDisclosure, useToast
 } from "@chakra-ui/react"
 
-import { showAlert } from "src/utils/SweetAlert2";
+import { DBType, DBPermission, DbTypeExtendedDescription, DBPermissionExtendedDescription } from 'src/lib/types';
 import { createDatabase } from 'src/lib/db';
 import { MapOrbitDbEntry } from "src/lib/mapper";
 import { useAppDbDispatch } from "src/context/dbs-reducer";
-import { useAppLogDispatch } from "../context/logs-reducer";
-import { DBType, DBPermission, DbTypeExtendedDescription, DBPermissionExtendedDescription } from 'src/lib/types';
 
+import { useAppLogDispatch } from "../context/logs-reducer";
 
 function CreateDbDialog() {
 
+    const toast = useToast();
     const dispatch = useAppDbDispatch();
     const logDispatch = useAppLogDispatch();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const cancelRef = useRef();
-    const [ db, setDb ] = useControllableState({ defaultValue: 'counter' });
-    const [ dbType, setDbType ] = useControllableState<DBType | ''>({ defaultValue: DBType.counter });
-    const [ permission, setPermission ] = useControllableState<DBPermission | ''>({ defaultValue: DBPermission.public });
+    const [ db, setDb ] = useControllableState({ defaultValue: '' });
+    const [ dbType, setDbType ] = useControllableState<DBType | ''>({ defaultValue: '' });
+    const [ permission, setPermission ] = useControllableState<DBPermission | ''>({ defaultValue: '' });
 
     const handleCreate = async () => {
         try {
 
-            if (!db || !dbType || !permission)
-                throw new Error('Please fill all fields');
+            if (!db || !dbType || !permission) {
+                toast({
+                    position: 'top',
+                    description: 'Please enter all the fields',
+                    status: 'error',
+                    isClosable: true,
+                });
+                return;
+            }
 
-            const { db: newDb } = await createDatabase(db, dbType, permission);
+            const { db: newDb } = await createDatabase({
+                name: db,
+                type: dbType,
+                permissions: permission
+            });
+
             const dbEntry = MapOrbitDbEntry(newDb);
             dispatch({
                 type: "added",
@@ -55,12 +67,6 @@ function CreateDbDialog() {
                     type: 'error'
                 }
             });
-
-            showAlert({
-                title: '',
-                text: error?.message || 'Something went wrong',
-                icon: 'error'
-            });
         }
     }
 
@@ -74,6 +80,7 @@ function CreateDbDialog() {
                 New Database
             </Button>
             <AlertDialog
+                motionPreset="slideInBottom"
                 isOpen={isOpen}
                 leastDestructiveRef={cancelRef as any}
                 onClose={onClose}
