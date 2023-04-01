@@ -102,7 +102,7 @@ export default function DataBaseList({ dbs = [] }: Props) {
 
     const navigate = useNavigate();
     const handleDelete = useCallback((row: DBRow) => {
-        console.log(`🐛  -> 🔥 :  handleDelete 🔥 :  row:`, row);
+
     }, []);
 
     const handleOpen = useCallback((row: DBRow) => {
