@@ -20,6 +20,7 @@
     "date-fns": "^2.29.3",
     "eslint": "^8.36.0",
     "eslint-config-react-app": "^7.0.1",
+    "framer-motion": "^10.10.0",
     "ipfs-core": "^0.18.0",
     "orbit-db": "^0.29.0",
     "react": "^18.2.0",
