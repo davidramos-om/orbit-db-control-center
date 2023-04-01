@@ -3,7 +3,7 @@ import { ReactElement, cloneElement, useEffect, useState, useRef } from "react";
 import {
     AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button,
     ModalCloseButton, Text, Textarea, useDisclosure
-} from "@chakra-ui/react"
+} from "@chakra-ui/react";
 
 import { isValidJson, prettyJson } from "src/utils/helper";
 import { confirmAlert } from "~/src/utils/SweetAlert2";
@@ -48,7 +48,7 @@ export default function EditJsonDocument({ json, children, onAccept }: Props) {
     const handleClose = async () => {
 
         const prompt = await confirmAlert({
-            title: 'Discard changes?',
+            title: 'Confirm',
             text: 'Are you sure you want to discard changes?',
             icon: 'question',
             cancelLabel: 'No',
@@ -74,7 +74,7 @@ export default function EditJsonDocument({ json, children, onAccept }: Props) {
                 <AlertDialogOverlay>
                     <AlertDialogContent>
                         <AlertDialogHeader fontSize='lg' fontWeight='bold'>
-                            Edit JSON Document
+                            JSON Document
                         </AlertDialogHeader>
                         <ModalCloseButton />
                         <AlertDialogBody>
