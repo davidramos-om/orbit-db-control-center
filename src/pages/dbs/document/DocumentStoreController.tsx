@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Button, useToast, Stack, Checkbox, InputGroup, InputRightElement, Spacer, Textarea } from "@chakra-ui/react";
 
+import EditJsonDocument from "src/blocks/EditJsonDocument";
 import { useAppLogDispatch } from "src/context/logs-reducer";
 import { addEntry } from "src/lib/db";
 import { isValidJson } from "src/utils/helper";
 
-import EditJsonDocument from "./EditJsonDocument";
 
 type Props = {
     dbAddress: string;
@@ -84,7 +84,7 @@ export default function DocStoreController({ dbAddress, dbName, onRefresh, onEnt
                 type: 'add',
                 log: {
                     id: hash,
-                    text: `Added event  to \`${dbName}\` db`,
+                    text: `Document added to \`${dbName}\` db`,
                     type: 'created'
                 }
             });
@@ -93,7 +93,7 @@ export default function DocStoreController({ dbAddress, dbName, onRefresh, onEnt
             dispatch({
                 type: 'add',
                 log: {
-                    text: `Failed to add event to \`${dbName}\` db - ${error?.message || 'unknown error'}`,
+                    text: `Failed to add document to \`${dbName}\` db - ${error?.message || 'something went wrong'}`,
                     type: 'error'
                 }
             });

@@ -4,10 +4,11 @@ import { type IPFS, create as createIPFSInstance } from 'ipfs-core';
 import config from './ipfs-config'
 import { DBPermission, DBType } from "./types";
 import { AddEntry as AddDocStoreEntry, queryEntries as fetchDocEntries, deleteEntry as delDocumentEntry } from "./docs-store";
+import { addEntry as AddFeedStoreEntry, iterator as queryFeedEntries, deleteEntry as deleteFeedEntry } from "./feed-store";
 
 
 export let orbitdb: any | null = null; //* OrbitDB instance
-export let programs: any | null = null; //* Programs database
+export let program: any | null = null; //* Programs database
 export let ipfs: IPFS | null = null; //* IPFS instance
 
 let starting_ipfs = false;
@@ -20,7 +21,7 @@ type addEntryOptions = {
   entry: Record<string, any>;
 }
 
-type fetchQueryOptions = {
+export type IteratorQueryOptions = {
   limit?: number;
   lte?: string;
   lt?: string;
@@ -32,7 +33,7 @@ type fetchQueryOptions = {
 type fetchDbOptions = {
   dbInstance?: any,
   hash?: string;
-  query?: fetchQueryOptions;
+  query?: IteratorQueryOptions;
   docsOptions?: {
     fullOp: boolean;
   }
@@ -75,26 +76,25 @@ export const initOrbitDB = async (ipfs: any) => {
 
 export const getAllDatabases = async () => {
 
-  if (!programs && orbitdb) {
+  if (!program && orbitdb) {
 
-    // Load programs database
-    programs = await orbitdb.feed('network.programs', {
+    program = await orbitdb.feed('network.programs', {
       accessController: { write: [ orbitdb.identity.id ] },
       create: true
     });
 
-    if (programs)
-      await programs.load()
+    if (program)
+      await program.load()
   }
 
-  return programs ? programs.iterator({ limit: -1 }).collect() : []
+  return program ? program.iterator({ limit: -1 }).collect() : []
 }
 
 export const getProgramByHash = (multiHash: string) => {
 
-  if (programs && orbitdb) {
+  if (program && orbitdb) {
 
-    const db = programs.iterator({ limit: -1 }).collect().find((db: any) => db.hash === multiHash);
+    const db = program.iterator({ limit: -1 }).collect().find((db: any) => db.hash === multiHash);
     if (db) {
       return {
         name: db.payload.value.name,
@@ -163,13 +163,16 @@ export const fetchEntries = async (
   const { fullOp = false } = docsOptions || {};
 
   const db = await dbInstance ? await new Promise((resolve) => resolve(dbInstance)) : await getDB(address);
-  console.log('db', db);
   if (!db)
     return null;
 
   switch (db.type) {
     case 'feed':
-      return await db.iterator(query).collect();
+      return queryFeedEntries({
+        feedstore: db,
+        fullOp: fullOp,
+        query: query || { limit: 1 }
+      });
     case 'eventlog':
       const _entries = await db.iterator(query).collect();
       return _entries;
@@ -203,13 +206,18 @@ export const addEntry = async (address: string, options: addEntryOptions) => {
 
   switch (db.type) {
     case 'feed':
-      return db.put(entry, value, { pin });
+      return AddFeedStoreEntry({
+        feedstore: db,
+        entry,
+        pin,
+      });
     case 'eventlog':
       return db.add(entry, { pin });
     case 'docstore':
       return AddDocStoreEntry({
         docstore: db,
         entry,
+        pin,
       });
     case 'keyvalue':
 
@@ -234,7 +242,11 @@ export const removeEntry = async (address: string, likeMultiHashOrKey: string) =
 
   switch (db.type) {
     case 'feed':
-      return db.remove(likeMultiHashOrKey);
+      return deleteFeedEntry({
+        feedstore: db,
+        hash: likeMultiHashOrKey
+      });
+
     case 'eventlog':
       throw new Error('Eventlog database does not support delete operation');
     case 'docstore':
@@ -256,11 +268,11 @@ export const addDatabase = async (address: string) => {
   if (!orbitdb)
     return Promise.reject('OrbitDB not initialized');
 
-  if (!programs)
+  if (!program)
     return Promise.reject('Programs database not initialized');
 
   const db = await orbitdb.open(address)
-  return programs.add({
+  return program.add({
     name: db.dbname,
     type: db.type,
     address: address,
@@ -268,7 +280,17 @@ export const addDatabase = async (address: string) => {
   })
 }
 
-export const createDatabase = async (name: string, type: DBType, permissions: DBPermission) => {
+export const createDatabase = async (
+  {
+    name,
+    type,
+    permissions
+  }: {
+    name: string,
+    type: DBType,
+    permissions: DBPermission
+  }
+) => {
 
   if (!orbitdb) {
     await initOrbitDB(ipfs);
@@ -276,9 +298,9 @@ export const createDatabase = async (name: string, type: DBType, permissions: DB
       return Promise.reject('OrbitDB not initialized');
   }
 
-  if (!programs) {
+  if (!program) {
     await getAllDatabases();
-    if (!programs)
+    if (!program)
       return Promise.reject('Programs database not initialized');
   }
 
@@ -289,33 +311,45 @@ export const createDatabase = async (name: string, type: DBType, permissions: DB
       accessController = { write: [ '*' ] }
       break
     default:
-      accessController = { write: [ orbitdb.identity.id ] }
+      accessController = {
+        write: [
+
+          // Give write access to ourselves
+          orbitdb.identity.id ]
+      }
       break
+  }
+
+
+  const options = {
+
+    // Setup write access
+    accessController,
   }
 
   let db = null;
 
   switch (type) {
     case DBType.keyvalue:
-      db = await orbitdb.keyvalue(name, { accessController });
+      db = await orbitdb.keyvalue(name, options);
       break;
     case DBType.counter:
-      db = await orbitdb.counter(name, { accessController });
+      db = await orbitdb.counter(name, options);
       break;
     case DBType.feed:
-      db = await orbitdb.feed(name, { accessController });
+      db = await orbitdb.feed(name, options);
       break;
     case DBType.eventlog:
-      db = await orbitdb.eventlog(name, { accessController });
+      db = await orbitdb.eventlog(name, options);
       break;
     case DBType.docstore:
-      db = await orbitdb.docstore(name, { accessController });
+      db = await orbitdb.docstore(name, options);
       break;
     default:
       throw new Error('Invalid database type');
   }
 
-  const hash = programs.add({
+  const hash = program.add({
     name,
     type,
     address: db.address.toString(),
@@ -330,12 +364,12 @@ export const createDatabase = async (name: string, type: DBType, permissions: DB
 
 export const removeDatabase = async (hash: string) => {
 
-  if (!programs)
+  if (!program)
     return Promise.reject('Programs database not initialized');
 
-  const db = programs.iterator({ limit: -1 }).collect().find((db: any) => db.hash === hash);
+  const db = program.iterator({ limit: -1 }).collect().find((db: any) => db.hash === hash);
   if (db) {
-    await programs.remove(db.hash);
+    await program.remove(db.hash);
     return true;
   }
 

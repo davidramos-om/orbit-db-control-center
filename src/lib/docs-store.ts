@@ -1,5 +1,6 @@
 
 // import type DocStore from 'orbit-db-docstore';
+import { validateParams } from './helper';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type DocStore<T> = any;
@@ -7,6 +8,7 @@ type DocStore<T> = any;
 interface AddDocEntryArgs {
     docstore: DocStore<any>;
     entry: any;
+    pin: boolean;
 }
 
 interface GetDocEntryArgs {
@@ -22,20 +24,10 @@ interface QueryDocEntryArgs {
     }
 }
 
-function validateParams(params: Record<string, any>) {
-
-    const keys = Object.keys(params);
-    for (let i = 0; i < keys.length; i++) {
-        const key = keys[ i ];
-        if (!params[ key ])
-            throw new Error(`${key} is required`);
-    }
-}
-
-export async function AddEntry({ docstore, entry }: AddDocEntryArgs) {
+export async function AddEntry({ docstore, entry, pin }: AddDocEntryArgs) {
 
     validateParams({ docstore, entry });
-    const hash = await docstore.put(entry);
+    const hash = await docstore.put(entry, { pin });
     return hash;
 }
 
