@@ -5,7 +5,6 @@ import RegreshDataBases from "src/blocks/RefreshDBs";
 import OpenDataBase from "src/blocks/OpenDB";
 
 import DataBaseList, { DBRow } from "src/blocks/DbList";
-import { MapOrbitDbEntry } from "src/lib/mapper";
 import { useAppDb } from "src/context/dbs-reducer";
 
 const HomePage = () => {
@@ -14,15 +13,15 @@ const HomePage = () => {
 
     const rows = dbs.map((db) => {
 
-        const entry = MapOrbitDbEntry(db);
+        // const entry = MapOrbitDbEntry(db);
 
         const _r: DBRow = {
-            id: entry.id,
-            multiHash: entry.hash,
-            name: entry.payload.value.name,
-            address: entry.payload.value.address,
-            date: new Date(entry.payload.value.added),
-            type: entry.payload.value.type
+            id: db.id,
+            multiHash: db.hash,
+            name: db.payload.value.name,
+            address: db.payload.value.address,
+            date: new Date(db.payload.value.added || 0),
+            type: db.payload.value.type
         }
 
         return _r;
