@@ -1,9 +1,7 @@
-
-// import type DocStore from 'orbit-db-docstore';
+import type DocStore from 'orbit-db-docstore';
 import { validateParams } from './helper';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type DocStore<T> = any;
+//* More info on the DocsStore API: https://github.com/orbitdb/orbit-db-docstore#readme
 
 interface AddDocEntryArgs {
     docstore: DocStore<any>;
@@ -27,7 +25,7 @@ interface QueryDocEntryArgs {
 export async function AddEntry({ docstore, entry, pin }: AddDocEntryArgs) {
 
     validateParams({ docstore, entry });
-    const hash = await docstore.put(entry, { pin });
+    const hash = await (docstore as any).put(entry, { pin });
     return hash;
 }
 
@@ -48,7 +46,7 @@ export function fetchDocEntries({ docstore, key }: GetDocEntryArgs) {
 export function queryEntries({ docstore, options, mapper }: QueryDocEntryArgs) {
 
     validateParams({ docstore, mapper });
-    const entries = docstore.query(mapper, options || {});
+    const entries = (docstore as any).query(mapper, options || {});
     return entries;
 }
 

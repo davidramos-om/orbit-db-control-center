@@ -44,6 +44,7 @@ export const DBPermissionExtendedDescription = [ {
 
 //? For type safety purposes only
 export type OrbitDbInstance = any & {};
+export type OrbitDbProgram = any & {};
 
 export interface DBEntry {
     id: string;

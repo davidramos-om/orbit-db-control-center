@@ -1,7 +1,7 @@
 
-import { DBEntry } from './types';
+import { DBEntry, OrbitDbProgram } from './types';
 
-export function MapOrbitDbEntry(db: any): DBEntry {
+export function MapOrbitDbEntry(db: any | OrbitDbProgram): DBEntry {
 
 
     return {

@@ -1,10 +1,6 @@
 import type FeedStore from 'orbit-db-feedstore';
 import { validateParams } from './helper';
-import { IteratorQueryOptions } from './db';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-// type FeedStore<T> = any;
-
+import { IteratorQueryOptions } from './manage-entries';
 
 //* More info on the FeedStore API: https://github.com/orbitdb/orbit-db/blob/main/API.md#orbitdbfeednameaddress
 

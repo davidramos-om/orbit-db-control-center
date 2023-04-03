@@ -2,46 +2,38 @@ import OrbitDB from 'orbit-db';
 import { type IPFS, create as createIPFSInstance } from 'ipfs-core';
 
 import config from './ipfs-config'
-import { DBPermission, DBType } from "./types";
-import { AddEntry as AddDocStoreEntry, queryEntries as fetchDocEntries, deleteEntry as delDocumentEntry } from "./docs-store";
-import { addEntry as AddFeedStoreEntry, iterator as queryFeedEntries, deleteEntry as deleteFeedEntry } from "./feed-store";
+import { OrbitDbProgram } from "./types";
 
-import { OrbitDbInstance } from './types';
-
-export let orbitdb: any | null = null; //* OrbitDB instance
-export let program: any | null = null; //* Programs database
-export let ipfs: IPFS | null = null; //* IPFS instance
+let orbitdb: any | null = null; //* OrbitDB instance
+let program: OrbitDbProgram | null = null; //* Programs database
+let ipfs: IPFS | null = null; //* IPFS instance
 
 let starting_ipfs = false;
 
-
-//* ---------------------- T Y P E S ---------------------- *//
-
-type addEntryOptions = {
-  pin: boolean;
-  entry: Record<string, any>;
+export function setProgream(_program: any) {
+  program = _program;
 }
 
-export type IteratorQueryOptions = {
-  limit?: number;
-  lte?: string;
-  lt?: string;
-  gte?: string;
-  gt?: string;
-  reverse?: boolean;
+export function getProgram() {
+  return program;
 }
 
-type fetchDbOptions = {
-  dbInstance: OrbitDbInstance | null;
-  hash?: string;
-  query?: IteratorQueryOptions;
-  docsOptions?: {
-    fullOp: boolean;
-  }
+export async function loadProgram() {
+  if (program)
+    await program.load();
 }
 
+export function getOrbitDB() {
+  return orbitdb;
+}
 
-//* ----------------------  F U N C T I O N S ---------------------- *//
+export function getIPFS() {
+  return ipfs;
+}
+
+export function getInstances() {
+  return { ipfs, orbitdb, program };
+}
 
 export const initIPFS = async () => {
 
@@ -75,315 +67,56 @@ export const initOrbitDB = async (ipfs: any) => {
   return orbitdb as OrbitDB;
 }
 
-export const getAllDatabases = async (): Promise<OrbitDbInstance[]> => {
+export const initPrograms = async () => {
 
-  if (!program && orbitdb) {
+  if (program)
+    return program as OrbitDbProgram;
 
-    program = await orbitdb.feed('network.programs', {
+  const orbitdb = getOrbitDB();
+  if (!orbitdb)
+    throw new Error('OrbitDB not initialized');
+
+  program = await orbitdb.feed('network.programs', {
       accessController: { write: [ orbitdb.identity.id ] },
       create: true
-    });
-
-    if (program)
-      await program.load()
-  }
-
-  if (program) {
-    return program.iterator({ limit: -1 }).collect() as OrbitDbInstance[];
-  }
-
-  return [];
-}
-
-export const getOneDatabase = async (address: string): Promise<OrbitDbInstance | null> => {
-
-  let db: OrbitDbInstance = null;
-  if (orbitdb) {
-    db = await orbitdb.open(address);
-    await db.load()
-  }
-
-  if (db)
-    return db as OrbitDbInstance;
-
-  return db
-}
-
-
-export const getProgramByHash = (multiHash: string) => {
-
-  if (program && orbitdb) {
-
-    const db = program.iterator({ limit: -1 }).collect().find((db: any) => db.hash === multiHash);
-    if (db) {
-      return {
-        name: db.payload.value.name,
-        type: db.payload.value.type,
-        address: db.payload.value.address,
-        added: db.payload.value.added
-      }
-    }
-  }
-
-  return null;
-}
-
-export const fetchEntry = async (address: string, likeMultiHashOrKey: string) => {
-
-  const db = await getOneDatabase(address);
-  if (!db)
-    return null;
-
-  switch (db.type) {
-    case 'feed':
-      return await db.get(likeMultiHashOrKey);
-    case 'eventlog':
-      return await db.get(likeMultiHashOrKey);
-    case 'docstore':
-      return await db.get(likeMultiHashOrKey);
-    case 'keyvalue':
-      return await db.get(likeMultiHashOrKey);
-    case 'counter':
-      return db.value || 0;
-    default:
-      return null;
-  }
-}
-
-export const fetchEntries = async (
-  address: string,
-  options: fetchDbOptions = {
-    dbInstance: null,
-    hash: '',
-    docsOptions: {
-      fullOp: false
-    },
-    query: {
-      limit: 10,
-      gt: '',
-      gte: '',
-      lt: '',
-      lte: '',
-      reverse: true
-  }
-  }) => {
-
-  const { dbInstance, docsOptions, query } = options;
-  const { fullOp = false } = docsOptions || {};
-
-  const db = await dbInstance ? await new Promise((resolve) => resolve(dbInstance)) : await getOneDatabase(address);
-  if (!db)
-    return null;
-
-  switch (db.type) {
-    case 'feed':
-      return queryFeedEntries({
-        feedstore: db,
-        fullOp: fullOp,
-        query: query || { limit: 1 }
-      });
-    case 'eventlog':
-      const _entries = await db.iterator(query).collect();
-      return _entries;
-    case 'docstore':
-      return fetchDocEntries({
-        docstore: db,
-        mapper: (e: any) => e !== null,
-        options: {
-          fullOp: fullOp
-        }
-      });
-    case 'keyvalue':
-      const all = await db.all;
-      return Object.keys(all).map(e => ({ payload: { key: e, value: db.get(e) } }));
-    case 'counter':
-      return db.value || 0;
-    default:
-      return null;
-  }
-}
-
-export const addEntry = async (address: string, options: addEntryOptions) => {
-
-  const db = await getOneDatabase(address);
-  if (!db)
-    return null;
-
-  const { pin = false, entry } = options || {};
-  const key = Object.keys(entry)[ 0 ];
-  const value = entry[ key ];
-
-  switch (db.type) {
-    case 'feed':
-      return AddFeedStoreEntry({
-        feedstore: db,
-        entry,
-        pin,
-      });
-    case 'eventlog':
-      return db.add(entry, { pin });
-    case 'docstore':
-      return AddDocStoreEntry({
-        docstore: db,
-        entry,
-        pin,
-      });
-    case 'keyvalue':
-
-      if (!entry.key)
-        return Promise.reject('Key is required for keyvalue database');
-      const theKey = entry.key;
-      const _entry = { ...entry };
-      delete _entry[ 'key' ];
-      return db.put(theKey, _entry);
-    case 'counter':
-      return db.inc(value);
-    default:
-      return null;
-  }
-}
-
-export const removeEntry = async (address: string, likeMultiHashOrKey: string) => {
-
-  const db = await getOneDatabase(address);
-  if (!db)
-    throw new Error('Database not found');
-
-  switch (db.type) {
-    case 'feed':
-      return deleteFeedEntry({
-        feedstore: db,
-        hash: likeMultiHashOrKey
-      });
-
-    case 'eventlog':
-      throw new Error('Eventlog database does not support delete operation');
-    case 'docstore':
-      return delDocumentEntry({
-        docstore: db,
-        key: likeMultiHashOrKey
-      });
-    case 'keyvalue':
-      return db.del(likeMultiHashOrKey);
-    case 'counter':
-      throw new Error('Counter database does not support delete operation');
-    default:
-      throw new Error('Database type not supported');
-  }
-}
-
-export const addDatabase = async (address: string) => {
-
-  if (!orbitdb)
-    return Promise.reject('OrbitDB not initialized');
-
-  if (!program)
-    return Promise.reject('Programs database not initialized');
-
-  const db = await orbitdb.open(address)
-  return program.add({
-    name: db.dbname,
-    type: db.type,
-    address: address,
-    added: Date.now()
-  })
-}
-
-export const createDatabase = async (
-  {
-    name,
-    type,
-    permissions
-  }: {
-    name: string,
-    type: DBType,
-    permissions: DBPermission
-  }
-): Promise<{
-  db: OrbitDbInstance,
-  hash: string
-}> => {
-
-  if (!orbitdb) {
-    await initOrbitDB(ipfs);
-    if (!orbitdb)
-      return Promise.reject('OrbitDB not initialized');
-  }
-
-  if (!program) {
-    await getAllDatabases();
-    if (!program)
-      return Promise.reject('Programs database not initialized');
-  }
-
-  let accessController = {};
-
-  switch (permissions) {
-    case 'public':
-      accessController = { write: [ '*' ] }
-      break
-    default:
-      accessController = {
-        write: [
-
-          // Give write access to ourselves
-          orbitdb.identity.id ]
-      }
-      break
-  }
-
-
-  const options = {
-
-    // Setup write access
-    accessController,
-  }
-
-  let db = null;
-
-  switch (type) {
-    case DBType.keyvalue:
-      db = await orbitdb.keyvalue(name, options);
-      break;
-    case DBType.counter:
-      db = await orbitdb.counter(name, options);
-      break;
-    case DBType.feed:
-      db = await orbitdb.feed(name, options);
-      break;
-    case DBType.eventlog:
-      db = await orbitdb.eventlog(name, options);
-      break;
-    case DBType.docstore:
-      db = await orbitdb.docstore(name, options);
-      break;
-    default:
-      throw new Error('Invalid database type');
-  }
-
-  const hash = await program.add({
-    name,
-    type,
-    address: db.address.toString(),
-    added: Date.now()
   });
 
-  return {
-    db,
-    hash
-  };
+  await program.load();
+
+  return program as OrbitDbProgram;
 }
 
-export const removeDatabase = async (hash: string) => {
 
-  if (!program)
-    return Promise.reject('Programs database not initialized');
+export function initDbSystem(): Promise<{ ipfs: IPFS, orbitdb: OrbitDB }> {
 
-  const db = program.iterator({ limit: -1 }).collect().find((db: any) => db.hash === hash);
-  if (db) {
-    await program.remove(db.hash);
-    return true;
-  }
+  return new Promise(async (resolve, reject) => {
 
-  return false;
+    try {
+
+      const ifps = await initIPFS();
+
+      if (ifps) {
+        const db = await initOrbitDB(ifps);
+        if (!db)
+          reject('OrbitDB not initialized');
+
+        const progs = await initPrograms();
+        if (!progs)
+          reject('Programs database not initialized');
+
+        resolve({
+          ipfs: ifps as IPFS,
+          orbitdb: db
+        });
+        }
+      else {
+        reject('IPFS not initialized');
+      }
+    }
+    catch (e) {
+      reject(e);
+    }
+  });
 }
+
+
