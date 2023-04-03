@@ -1,7 +1,7 @@
 import { Stack } from "@chakra-ui/react";
 
-import { useAppDb } from "src/context/dbs-reducer";
-import DbGoBack from "src/components/DbGoBack";
+import { useAppDb } from "#/context/dbs-reducer";
+import DbGoBack from "#/components/DbGoBack";
 import DbInformation from "./DbInformation";
 
 type Props = {

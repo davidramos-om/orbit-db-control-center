@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { IconButton } from "@chakra-ui/react";
 import { DeleteIcon } from "@chakra-ui/icons";
 
-import { confirmAlert } from "src/utils/SweetAlert2";
+import { confirmAlert } from "#/utils/SweetAlert2";
 
 type Props = {
     identifier: string;

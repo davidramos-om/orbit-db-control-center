@@ -3,8 +3,8 @@ import { Badge, IconButton } from '@chakra-ui/react';
 import { ViewIcon, DeleteIcon, CloseIcon, SettingsIcon } from '@chakra-ui/icons'
 import { useNavigate } from "react-router-dom";
 
-import DataTable, { DataColumn } from "src/components/Table";
-import { PATH } from 'src/routes';
+import DataTable, { DataColumn } from "#/components/Table";
+import { PATH } from '#/routes';
 
 export type DBRow = {
     id: string;

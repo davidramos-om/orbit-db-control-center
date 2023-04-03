@@ -5,8 +5,8 @@ import {
     ModalCloseButton, Text, Textarea, useDisclosure
 } from "@chakra-ui/react";
 
-import { isValidJson, prettyJson } from "src/utils/helper";
-import { confirmAlert } from "src/utils/SweetAlert2";
+import { isValidJson, prettyJson } from "#/utils/helper";
+import { confirmAlert } from "#/utils/SweetAlert2";
 
 type Props = {
     json: string

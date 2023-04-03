@@ -1,9 +1,9 @@
 import { Accordion, AccordionItem, AccordionButton, Box, Flex, AccordionIcon, AccordionPanel, useColorModeValue, HStack, Text } from '@chakra-ui/react'
 import { useEffect, useRef } from "react";
 
-import { TreeDotsHorizontalSvgIcon } from "src/components/TreeDotsHorizontalSvgIcon";
-import { useAppLog } from "src/context/logs-reducer";
-import { sentenseCase } from "src/utils/helper";
+import { TreeDotsHorizontalSvgIcon } from "#/components/TreeDotsHorizontalSvgIcon";
+import { useAppLog } from "#/context/logs-reducer";
+import { sentenseCase } from "#/utils/helper";
 
 
 type Colors = {

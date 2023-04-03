@@ -2,7 +2,7 @@ import { ArrowBackIcon } from "@chakra-ui/icons";
 import { Heading, HStack, IconButton } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 
-import { PATH } from "../routes";
+import { PATH } from "#/routes";
 
 export default function DbGoBack() {
 

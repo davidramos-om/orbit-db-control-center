@@ -1,6 +1,6 @@
 import { Badge, Card, CardBody, CardHeader, Heading, Stack, Text } from "@chakra-ui/react";
 
-import { DBType } from "src/lib/types";
+import { DBType } from "#/lib/types";
 import { colorSchema } from './DbList'
 
 

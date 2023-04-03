@@ -4,8 +4,8 @@ import {
     FormControl, FormLabel, Input, ModalCloseButton, Stack, useControllableState, useDisclosure, useToast,
 } from "@chakra-ui/react"
 
-import { addDatabase } from 'src/lib/db';
-import { useAppLogDispatch } from 'src/context/logs-reducer';
+import { addDatabase } from "#/lib/manage-dbs";
+import { useAppLogDispatch } from '#/context/logs-reducer';
 
 type OpenDbProps = {
     onDbOpened: (hash: string) => void;

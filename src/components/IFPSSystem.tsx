@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useToken } from "@chakra-ui/react";
 import { type IPFS } from "ipfs-core";
 
-import { useAppLogDispatch } from "src/context/logs-reducer";
-import useIsMounted from "src/hooks/useIsMounted";
-import { SystemState } from "src/lib/types";
-import { initIPFS } from "src/lib/db";
+import { useAppLogDispatch } from "#/context/logs-reducer";
+import useIsMounted from "#/hooks/useIsMounted";
+import { SystemState } from "#/lib/types";
+import { initIPFS } from "#/lib/db";
 
 import { SytemStatusIcon } from "./SytemStatusIcon";
 
