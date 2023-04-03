@@ -29,7 +29,7 @@ export const useAbortController = (shouldAutoRestart = false) => {
             abortController.current.abort()
         }
 
-    }, [ abortController.current ])
+    }, [ abortController ])
 
     return abortController.current;
 }
