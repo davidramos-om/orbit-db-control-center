@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { type IPFS } from "ipfs-core";
 
-import { useAppDbDispatch } from "src/context/dbs-reducer";
+import { useAppDbDispatch } from "#/context/dbs-reducer";
+import { getAllPrograms } from "#/lib/manage-programs";
+import { MapOrbitDbEntry } from "#/lib/mapper";
 import { IFPSSystem } from "./IFPSSystem";
 import { OrbitDbSystem } from "./OrbitDbSystem";
-import { getAllDatabases } from "src/lib/db";
-import { MapOrbitDbEntry } from "src/lib/mapper";
 
 export function Systems() {
 
@@ -14,8 +14,8 @@ export function Systems() {
 
     const handleOrbitDbReady = async () => {
 
-        const entries = await getAllDatabases();
-        const dbs = entries.map((db: any) => { return MapOrbitDbEntry(db) });
+        const programs = await getAllPrograms();
+        const dbs = programs.map((db: any) => { return MapOrbitDbEntry(db) });
         dispatch({
             type: 'init',
             dbs,

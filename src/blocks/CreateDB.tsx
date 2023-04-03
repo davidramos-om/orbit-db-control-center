@@ -4,12 +4,12 @@ import {
     FormControl, FormLabel, Input, ModalCloseButton, Select, Stack, useControllableState, useDisclosure, useToast
 } from "@chakra-ui/react"
 
-import { DBType, DBPermission, DbTypeExtendedDescription, DBPermissionExtendedDescription } from 'src/lib/types';
-import { createDatabase } from 'src/lib/db';
-import { MapOrbitDbEntry } from "src/lib/mapper";
-import { useAppDbDispatch } from "src/context/dbs-reducer";
-
-import { useAppLogDispatch } from "../context/logs-reducer";
+import { DBType, DBPermission, DbTypeExtendedDescription, DBPermissionExtendedDescription } from '#/lib/types';
+import { getProgramByHash } from "#/lib/manage-programs";
+import { createDatabase } from "#/lib/manage-dbs";
+import { MapOrbitDbEntry } from "#/lib/mapper";
+import { useAppDbDispatch } from "#/context/dbs-reducer";
+import { useAppLogDispatch } from "#/context/logs-reducer";
 
 function CreateDbDialog() {
 
@@ -35,13 +35,15 @@ function CreateDbDialog() {
                 return;
             }
 
-            const { db: newDb } = await createDatabase({
+            const { hash } = await createDatabase({
                 name: db,
                 type: dbType,
                 permissions: permission
             });
 
-            const dbEntry = MapOrbitDbEntry(newDb);
+            const program = getProgramByHash(hash);
+            const dbEntry = MapOrbitDbEntry(program);
+
             dispatch({
                 type: "added",
                 db: dbEntry

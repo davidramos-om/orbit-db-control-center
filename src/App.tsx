@@ -4,7 +4,7 @@ import { useRoutes, } from 'react-router-dom';
 import { Suspense, useCallback, useEffect } from 'react'
 
 import Layout from "src/components/Layout";
-import { getAllDatabases } from "src/lib/db";
+import { getAllPrograms } from "./lib/manage-programs";
 import { useAppDbDispatch } from "src/context/dbs-reducer";
 
 import { routes } from "./routes";
@@ -15,7 +15,7 @@ const App = () => {
   const dispatch = useAppDbDispatch();
 
   const getDbs = useCallback(async () => {
-    const dbs = await getAllDatabases();
+    const dbs = await getAllPrograms();
     const entries = dbs.map((db: any) => { return MapOrbitDbEntry(db) });
     dispatch({
       type: 'init',
