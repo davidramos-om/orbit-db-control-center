@@ -6,6 +6,7 @@ import { DBPermission, DBType } from "./types";
 import { AddEntry as AddDocStoreEntry, queryEntries as fetchDocEntries, deleteEntry as delDocumentEntry } from "./docs-store";
 import { addEntry as AddFeedStoreEntry, iterator as queryFeedEntries, deleteEntry as deleteFeedEntry } from "./feed-store";
 
+import { OrbitDbInstance } from './types';
 
 export let orbitdb: any | null = null; //* OrbitDB instance
 export let program: any | null = null; //* Programs database
@@ -31,7 +32,7 @@ export type IteratorQueryOptions = {
 }
 
 type fetchDbOptions = {
-  dbInstance?: any,
+  dbInstance: OrbitDbInstance | null;
   hash?: string;
   query?: IteratorQueryOptions;
   docsOptions?: {
@@ -74,7 +75,7 @@ export const initOrbitDB = async (ipfs: any) => {
   return orbitdb as OrbitDB;
 }
 
-export const getAllDatabases = async () => {
+export const getAllDatabases = async (): Promise<OrbitDbInstance[]> => {
 
   if (!program && orbitdb) {
 
@@ -87,8 +88,27 @@ export const getAllDatabases = async () => {
       await program.load()
   }
 
-  return program ? program.iterator({ limit: -1 }).collect() : []
+  if (program) {
+    return program.iterator({ limit: -1 }).collect() as OrbitDbInstance[];
+  }
+
+  return [];
 }
+
+export const getOneDatabase = async (address: string): Promise<OrbitDbInstance | null> => {
+
+  let db: OrbitDbInstance = null;
+  if (orbitdb) {
+    db = await orbitdb.open(address);
+    await db.load()
+  }
+
+  if (db)
+    return db as OrbitDbInstance;
+
+  return db
+}
+
 
 export const getProgramByHash = (multiHash: string) => {
 
@@ -108,20 +128,9 @@ export const getProgramByHash = (multiHash: string) => {
   return null;
 }
 
-export const getDB = async (address: string) => {
-
-  let db = null;
-  if (orbitdb) {
-    db = await orbitdb.open(address)
-    await db.load()
-  }
-
-  return db
-}
-
 export const fetchEntry = async (address: string, likeMultiHashOrKey: string) => {
 
-  const db = await getDB(address);
+  const db = await getOneDatabase(address);
   if (!db)
     return null;
 
@@ -162,7 +171,7 @@ export const fetchEntries = async (
   const { dbInstance, docsOptions, query } = options;
   const { fullOp = false } = docsOptions || {};
 
-  const db = await dbInstance ? await new Promise((resolve) => resolve(dbInstance)) : await getDB(address);
+  const db = await dbInstance ? await new Promise((resolve) => resolve(dbInstance)) : await getOneDatabase(address);
   if (!db)
     return null;
 
@@ -196,7 +205,7 @@ export const fetchEntries = async (
 
 export const addEntry = async (address: string, options: addEntryOptions) => {
 
-  const db = await getDB(address);
+  const db = await getOneDatabase(address);
   if (!db)
     return null;
 
@@ -236,7 +245,7 @@ export const addEntry = async (address: string, options: addEntryOptions) => {
 
 export const removeEntry = async (address: string, likeMultiHashOrKey: string) => {
 
-  const db = await getDB(address);
+  const db = await getOneDatabase(address);
   if (!db)
     throw new Error('Database not found');
 
@@ -290,7 +299,10 @@ export const createDatabase = async (
     type: DBType,
     permissions: DBPermission
   }
-) => {
+): Promise<{
+  db: OrbitDbInstance,
+  hash: string
+}> => {
 
   if (!orbitdb) {
     await initOrbitDB(ipfs);
@@ -349,7 +361,7 @@ export const createDatabase = async (
       throw new Error('Invalid database type');
   }
 
-  const hash = program.add({
+  const hash = await program.add({
     name,
     type,
     address: db.address.toString(),

@@ -41,6 +41,10 @@ export const DBPermissionExtendedDescription = [ {
     description: 'Creator-only : only you can write, anyone can read'
 } ]
 
+
+//? For type safety purposes only
+export type OrbitDbInstance = any & {};
+
 export interface DBEntry {
     id: string;
     hash: string;
