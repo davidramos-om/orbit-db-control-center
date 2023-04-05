@@ -1,8 +1,8 @@
 import { TableVirtuoso } from "react-virtuoso";
 import { Tr, Th, Td, useColorModeValue } from '@chakra-ui/react';
 
-import { TableComponents } from 'src/components/Table/Virtuoso'
-import ShowEntryPayload from 'src/blocks/ShowPayload';
+import { TableComponents } from '#/components/Table/Virtuoso'
+import ShowEntryPayload from '#/blocks/ShowPayload';
 
 export type EventLogModel = {
     id: string;

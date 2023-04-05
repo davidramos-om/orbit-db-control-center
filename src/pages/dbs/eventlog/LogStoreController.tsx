@@ -2,9 +2,9 @@ import { useMemo, useState } from "react";
 import { useParams } from 'react-router-dom';
 import { Button, Input, Stack } from "@chakra-ui/react";
 
-import { useAppDb } from "src/context/dbs-reducer";
-import { useAppLogDispatch } from "src/context/logs-reducer";
-import { addEntry } from "src/lib/db";
+import { useAppDb } from "#/context/dbs-reducer";
+import { useAppLogDispatch } from "#/context/logs-reducer";
+import { addEntry } from "#/lib/manage-entries";
 
 type Props = {
     onRefresh: () => void;

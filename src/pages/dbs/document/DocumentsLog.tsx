@@ -1,7 +1,7 @@
 import { TableVirtuoso } from "react-virtuoso";
 import { Tr, Th, useColorModeValue } from "@chakra-ui/react";
 
-import { TableComponents } from 'src/components/Table/Virtuoso';
+import { TableComponents } from '#/components/Table/Virtuoso';
 import { RowItem } from "./RowItem";
 
 export type DocStoreModel = {

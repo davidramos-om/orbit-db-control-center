@@ -2,11 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from 'react-router-dom';
 import { Card, CardBody, CardHeader, Heading, Stack, Text } from "@chakra-ui/react";
 
-import DbHeaderCard from "src/blocks/DbHeader";
-import { showAlert } from "src/utils/SweetAlert2";
-import { useAppDb } from "src/context/dbs-reducer";
-import { useAppLogDispatch } from "src/context/logs-reducer";
-import { addEntry, fetchEntries } from "src/lib/db";
+import DbHeaderCard from "#/blocks/DbHeader";
+import { showAlert } from "#/utils/SweetAlert2";
+import { useAppDb } from "#/context/dbs-reducer";
+import { useAppLogDispatch } from "#/context/logs-reducer";
+import { addEntry, fetchEntries } from "#/lib/manage-entries";
 
 import IncrementerControl from "./IncrementerController";
 

@@ -1,5 +1,5 @@
 import { type ReactNode, createContext, useContext, useReducer } from 'react';
-import { DBEntry } from 'src/lib/types';
+import { DBEntry } from '#/lib/types';
 
 type ReducerAction = {
     type: 'added' | 'changed' | 'deleted' | 'init';

@@ -1,11 +1,10 @@
 import { Box, Stack, Text } from '@chakra-ui/react';
 
-import CreateDataBase from "src/blocks/CreateDB";
-import RegreshDataBases from "src/blocks/RefreshDBs";
-import OpenDataBase from "src/blocks/OpenDB";
-
-import DataBaseList, { DBRow } from "src/blocks/DbList";
-import { useAppDb } from "src/context/dbs-reducer";
+import CreateDataBase from "#/blocks/CreateDB";
+import RegreshDataBases from "#/blocks/RefreshDBs";
+import OpenDataBase from "#/blocks/OpenDB";
+import DataBaseList, { DBRow } from "#/blocks/DbList";
+import { useAppDb } from "#/context/dbs-reducer";
 
 const HomePage = () => {
 

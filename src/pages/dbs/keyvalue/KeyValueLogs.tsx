@@ -2,7 +2,7 @@ import { forwardRef } from 'react'
 import { TableVirtuoso } from "react-virtuoso";
 import { Table, Thead, Tbody, Tr, Th, Td, TableCaption, TableContainer, useColorModeValue } from '@chakra-ui/react';
 
-import ShowEntryPayload from 'src/blocks/ShowPayload';
+import ShowEntryPayload from '#/blocks/ShowPayload';
 
 export type KeyValueModel = {
     date: Date;

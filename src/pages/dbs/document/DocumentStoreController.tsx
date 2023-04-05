@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Button, useToast, Stack, Checkbox, InputGroup, InputRightElement, Spacer, Textarea } from "@chakra-ui/react";
 
-import EditJsonDocument from "src/blocks/EditJsonDocument";
-import { useAppLogDispatch } from "src/context/logs-reducer";
-import { addEntry } from "src/lib/db";
-import { isValidJson } from "src/utils/helper";
+import EditJsonDocument from "#/blocks/EditJsonDocument";
+import { useAppLogDispatch } from "#/context/logs-reducer";
+import { addEntry } from "#/lib/manage-entries";
+import { isValidJson } from "#/utils/helper";
 
 
 type Props = {

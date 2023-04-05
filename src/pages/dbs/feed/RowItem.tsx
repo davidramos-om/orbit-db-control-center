@@ -1,10 +1,10 @@
 import { useCallback, useState } from "react";
 import { Td, HStack } from "@chakra-ui/react";
 
-import ShowEntryPayload from 'src/blocks/ShowPayload';
-import DeleteEntry from 'src/blocks/DeleteEntryButton';
-import { useAppLogDispatch } from 'src/context/logs-reducer';
-import { removeEntry } from 'src/lib/db'
+import ShowEntryPayload from '#/blocks/ShowPayload';
+import DeleteEntry from '#/blocks/DeleteEntryButton';
+import { useAppLogDispatch } from '#/context/logs-reducer';
+import { removeEntry } from "#/lib/manage-entries";
 import { FeedStoreModel } from "./FeedLog";
 
 export type RowItemProps = {

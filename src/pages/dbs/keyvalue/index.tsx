@@ -2,11 +2,11 @@ import { useCallback, useState, useMemo, useEffect } from "react";
 import { useParams } from 'react-router-dom';
 import { Card, CardHeader, CardBody, Heading, Stack } from "@chakra-ui/react";
 
-import DbHeaderCard from "src/blocks/DbHeader";
-import { useAppDb } from "src/context/dbs-reducer";
-import useIsMounted from "src/hooks/useIsMounted";
-import { fetchEntries } from "src/lib/db";
-import { ShowLoading, StopLoading } from "src/utils/SweetAlert2";
+import DbHeaderCard from "#/blocks/DbHeader";
+import { useAppDb } from "#/context/dbs-reducer";
+import useIsMounted from "#/hooks/useIsMounted";
+import { fetchEntries } from "#/lib/manage-entries";
+import { ShowLoading, StopLoading } from "#/utils/SweetAlert2";
 
 import KeyValueLogs, { KeyValueModel } from './KeyValueLogs';
 import KeyValueStoreControl from './KeyValueController';

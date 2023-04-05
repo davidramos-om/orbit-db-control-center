@@ -1,8 +1,8 @@
 import { Avatar, Box, Divider, Flex, Heading, HStack, Link, Spacer, Text, useColorModeValue, chakra, IconButton } from "@chakra-ui/react";
 import { Link as ReactLink } from 'react-router-dom'
 
-import ColorModeToggle from 'src/components/ThemeMode';
-import AppLogs from 'src/blocks/AppLogs';
+import ColorModeToggle from '#/components/ThemeMode';
+import AppLogs from '#/blocks/AppLogs';
 import { Systems } from "./Systems";
 import Iconify from "./SvgIconify";
 

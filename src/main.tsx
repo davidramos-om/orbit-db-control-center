@@ -5,8 +5,8 @@ import { ChakraProvider } from '@chakra-ui/react';
 
 import './index.css'
 import App from './App'
-import { AppLogProvider } from "./context/logs-reducer";
-import { AppDbProvider } from "./context/dbs-reducer";
+import { AppLogProvider } from "src/context/logs-reducer";
+import { AppDbProvider } from "src/context/dbs-reducer";
 import theme from 'src/theme';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(

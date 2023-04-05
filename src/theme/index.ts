@@ -1,10 +1,3 @@
-// export default {
-//     colors: {
-//         transparent: 'transparent',
-//         black: '#171923',
-//         white: '#F7FAFC',
-//     },    
-// }
 
 import { extendTheme } from '@chakra-ui/react'
 

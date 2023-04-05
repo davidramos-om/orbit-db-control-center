@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Table, Thead, Tbody, Tr, Th, Td, TableCaption, TableContainer, useColorModeValue } from '@chakra-ui/react';
 
-import { ShortDateDividerHelper } from "src/utils/date-service";
+import { ShortDateDividerHelper } from "#/utils/date-service";
 
 export type DataColumn = {
     name: string;
