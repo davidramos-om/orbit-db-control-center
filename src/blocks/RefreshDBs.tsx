@@ -1,10 +1,10 @@
 import { Button } from "@chakra-ui/react"
 
-import { ShowLoading, StopLoading } from "src/utils/SweetAlert2";
-import { getAllDatabases } from "src/lib/db"
-import { MapOrbitDbEntry } from "src/lib/mapper";
-import { useAppDbDispatch } from "src/context/dbs-reducer";
-import { useAppLogDispatch } from "src/context/logs-reducer";
+import { ShowLoading, StopLoading } from "#/utils/SweetAlert2";
+import { getAllPrograms } from "#/lib/manage-programs";
+import { MapOrbitDbEntry } from "#/lib/mapper";
+import { useAppDbDispatch } from "#/context/dbs-reducer";
+import { useAppLogDispatch } from "#/context/logs-reducer";
 
 export default function RegreshDataBases() {
 
@@ -15,8 +15,8 @@ export default function RegreshDataBases() {
         try {
 
             ShowLoading({ title: 'Refreshing DataBases' });
-            const entries = await getAllDatabases();
-            const dbs = entries.map((db: any) => { return MapOrbitDbEntry(db) });
+            const programs = await getAllPrograms();
+            const dbs = programs.map((p: any) => { return MapOrbitDbEntry(p) });
 
             dispatch({
                 type: 'init',

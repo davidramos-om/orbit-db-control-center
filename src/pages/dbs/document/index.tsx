@@ -2,12 +2,12 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardHeader, CardBody, Heading, Stack } from "@chakra-ui/react";
 
-import { useAppDb } from "src/context/dbs-reducer";
-import useIsMounted from "src/hooks/useIsMounted";
-import { ShowLoading, StopLoading } from "src/utils/SweetAlert2";
-import { fetchEntries } from "src/lib/db";
+import { useAppDb } from "#/context/dbs-reducer";
+import useIsMounted from "#/hooks/useIsMounted";
+import { ShowLoading, StopLoading } from "#/utils/SweetAlert2";
+import { fetchEntries } from "#/lib/manage-entries";
 
-import DbHeaderCard from "src/blocks/DbHeader";
+import DbHeaderCard from "#/blocks/DbHeader";
 import DocumentStoreControl from './DocumentStoreController';
 import DocumentLogs, { DocStoreModel } from './DocumentsLog';
 
@@ -31,6 +31,7 @@ export default function DocumentDbPage() {
                 ShowLoading({ title: 'Loading docstore log...' });
 
             const _entries = await fetchEntries(dbAddress, {
+                dbInstance: null,
                 docsOptions: { fullOp: true },
                 query: { reverse: true, limit: -1 }
             });
