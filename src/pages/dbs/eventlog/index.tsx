@@ -1,12 +1,11 @@
 import { useMemo, useEffect, useCallback, useState } from "react";
 import { useParams } from 'react-router-dom';
-import { Card, CardHeader, CardBody, Heading, Stack } from "@chakra-ui/react";
+import { Card, CardHeader, CardBody, Heading, Stack, Progress } from "@chakra-ui/react";
 
 import DbHeaderCard from "#/blocks/DbHeader";
 import { useAppDb } from "#/context/dbs-reducer";
 import useIsMounted from "#/hooks/useIsMounted";
 import { fetchEntries, fetchEntry } from "#/lib/manage-entries";
-import { ShowLoading, StopLoading } from "#/utils/SweetAlert2";
 
 import EventLogStoreControl from './LogStoreController';
 import EventLogs, { EventLogModel } from './EventLogs';
@@ -16,6 +15,7 @@ export default function EventLogDbPage() {
     const { id } = useParams();
     const { findDb } = useAppDb();
     const [ entries, setEntries ] = useState<EventLogModel[]>([]);
+    const [ loading, setLoading ] = useState<boolean>(false);
     const isMounted = useIsMounted();
 
     const dbEntry = useMemo(() => findDb(id || ''), [ id, findDb ]);
@@ -27,7 +27,7 @@ export default function EventLogDbPage() {
             if (!dbAddress)
                 return;
 
-            ShowLoading({ title: 'Loading event log...' });
+            setLoading(true);
 
             const _entries = await fetchEntries(dbAddress, { query: { reverse: true, limit: -1 } });
             if (!_entries)
@@ -63,7 +63,7 @@ export default function EventLogDbPage() {
             console.error(error);
         }
         finally {
-            StopLoading();
+            setLoading(false);
         }
     }, [ dbAddress, isMounted ]);
 
@@ -134,6 +134,7 @@ export default function EventLogDbPage() {
                     <br />
                 </CardHeader>
                 <CardBody>
+                    {loading && <Progress size='xs' isIndeterminate />}
                     <EventLogs entries={entries || []} />
                 </CardBody>
             </Card>

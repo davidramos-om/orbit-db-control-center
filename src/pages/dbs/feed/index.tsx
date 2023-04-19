@@ -1,8 +1,7 @@
 import { useEffect, useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Card, CardHeader, CardBody, Heading, Stack } from "@chakra-ui/react";
+import { Card, CardHeader, CardBody, Heading, Stack, Progress } from "@chakra-ui/react";
 
-import { ShowLoading, StopLoading } from "#/utils/SweetAlert2";
 import { useAppDb } from "#/context/dbs-reducer";
 import useIsMounted from "#/hooks/useIsMounted";
 import DbHeaderCard from "#/blocks/DbHeader";
@@ -17,6 +16,7 @@ export default function FeedDbPage() {
     const { findDb } = useAppDb();
     const [ entries, setEntries ] = useState<FeedStoreModel[]>([]);
     const isMounted = useIsMounted();
+    const [ loading, setLoading ] = useState<boolean>(false);
 
     const dbEntry = useMemo(() => findDb(id || ''), [ id, findDb ]);
     const dbAddress = useMemo(() => dbEntry?.payload.value.address, [ dbEntry ]);
@@ -28,7 +28,7 @@ export default function FeedDbPage() {
                 return;
 
             if (showLoader)
-                ShowLoading({ title: 'Loading feed log...' });
+                setLoading(true);
 
             const _entries = await fetchEntries(dbAddress, {
                 docsOptions: { fullOp: true },
@@ -78,7 +78,7 @@ export default function FeedDbPage() {
             console.error(error);
         }
         finally {
-            StopLoading();
+            setLoading(false);
         }
     }, [ dbAddress, isMounted ]);
 
@@ -121,6 +121,7 @@ export default function FeedDbPage() {
                     <br />
                 </CardHeader>
                 <CardBody>
+                    {loading && <Progress size='xs' isIndeterminate />}
                     <FeedLogs
                         dbAddress={dbAddress || ''}
                         entries={entries || []}

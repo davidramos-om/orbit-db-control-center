@@ -1,10 +1,9 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { Card, CardHeader, CardBody, Heading, Stack } from "@chakra-ui/react";
+import { Card, CardHeader, CardBody, Heading, Stack, Progress } from "@chakra-ui/react";
 
 import { useAppDb } from "#/context/dbs-reducer";
 import useIsMounted from "#/hooks/useIsMounted";
-import { ShowLoading, StopLoading } from "#/utils/SweetAlert2";
 import { fetchEntries } from "#/lib/manage-entries";
 
 import DbHeaderCard from "#/blocks/DbHeader";
@@ -16,6 +15,7 @@ export default function DocumentDbPage() {
     const { id } = useParams();
     const { findDb } = useAppDb();
     const [ entries, setEntries ] = useState<DocStoreModel[]>([]);
+    const [ loading, setLoading ] = useState<boolean>(false);
     const isMounted = useIsMounted();
 
     const dbEntry = useMemo(() => findDb(id || ''), [ id, findDb ]);
@@ -28,7 +28,7 @@ export default function DocumentDbPage() {
                 return;
 
             if (showLoader)
-                ShowLoading({ title: 'Loading docstore log...' });
+                setLoading(true);
 
             const _entries = await fetchEntries(dbAddress, {
                 dbInstance: null,
@@ -80,7 +80,7 @@ export default function DocumentDbPage() {
             console.error(error);
         }
         finally {
-            StopLoading();
+            setLoading(false);
         }
     }, [ dbAddress, isMounted ]);
 
@@ -123,6 +123,7 @@ export default function DocumentDbPage() {
                     <br />
                 </CardHeader>
                 <CardBody>
+                    x{loading && <Progress size='xs' isIndeterminate />}
                     <DocumentLogs
                         dbAddress={dbAddress || ''}
                         entries={entries || []}

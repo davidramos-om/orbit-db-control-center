@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from 'react-router-dom';
-import { Card, CardBody, CardHeader, Heading, Stack, Text } from "@chakra-ui/react";
+import { Card, CardBody, CardHeader, Heading, Stack, Text, Progress } from "@chakra-ui/react";
 
 import DbHeaderCard from "#/blocks/DbHeader";
 import { showAlert } from "#/utils/SweetAlert2";
@@ -16,16 +16,26 @@ export default function CounterDbPage() {
     const { findDb } = useAppDb();
     const dispatch = useAppLogDispatch();
     const dbEntry = useMemo(() => findDb(id || ''), [ id, findDb ]);
-
+    const [ loading, setLoading ] = useState<boolean>(false);
     const [ counter, setCounter ] = useState(0);
 
     const readCounter = useCallback(async () => {
 
-        if (!dbEntry)
-            return;
+        try {
 
-        const counter = await fetchEntries(dbEntry.payload.value.address, {});
-        setCounter(Number(counter || 0));
+            if (!dbEntry)
+                return;
+
+            setLoading(true);
+            const counter = await fetchEntries(dbEntry.payload.value.address, {});
+            setCounter(Number(counter || 0));
+        }
+        catch (error) {
+            console.log(error);
+        }
+        finally {
+            setLoading(false);
+        }
 
     }, [ dbEntry ]);
 
@@ -76,6 +86,7 @@ export default function CounterDbPage() {
                     <br />
                 </CardHeader>
                 <CardBody>
+                    {loading && <Progress size='xs' isIndeterminate />}
                     <Heading fontSize={"sm"} mb={2}>
                         Increment the value of the counter by:
                     </Heading>
