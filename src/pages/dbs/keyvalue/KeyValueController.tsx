@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useParams } from 'react-router-dom';
-import { Button, Input, Stack } from "@chakra-ui/react";
+import { Button, Input, Stack, Checkbox } from "@chakra-ui/react";
 
 import { useAppDb } from "#/context/dbs-reducer";
 import { useAppLogDispatch } from "#/context/logs-reducer";
@@ -15,6 +15,7 @@ export default function KeyValueStoreController({ onRefresh, onAddEvent }: Props
 
     const [ value, setValue ] = useState('');
     const [ key, setKey ] = useState('');
+    const [ pinData, setPinData ] = useState(false);
 
     const { id } = useParams();
     const { findDb } = useAppDb();
@@ -38,10 +39,11 @@ export default function KeyValueStoreController({ onRefresh, onAddEvent }: Props
             const input = {
                 key: key,
                 value: value,
+                pin: pinData,
                 timestamp: Date.now()
             }
 
-            const hash = await addEntry(dbEntry?.payload.value.address, { pin: false, entry: input });
+            const hash = await addEntry(dbEntry?.payload.value.address, { pin: pinData, entry: input });
 
             onAddEvent(key);
             dispatch({
@@ -83,6 +85,15 @@ export default function KeyValueStoreController({ onRefresh, onAddEvent }: Props
                 onChange={(e) => setValue(e.target.value)}
             >
             </Input>
+            <Checkbox
+                isChecked={pinData}
+                width={{ base: '100%', md: 'auto' }}
+                onChange={(e) => {
+                    setPinData(e.target.checked);
+                }}
+            >
+                Pin
+            </Checkbox>
             <Button
                 width={"sm"}
                 variant={"outline"}

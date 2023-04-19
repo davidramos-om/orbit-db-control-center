@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useParams } from 'react-router-dom';
-import { Button, Input, Stack } from "@chakra-ui/react";
+import { Button, Input, Stack, Checkbox } from "@chakra-ui/react";
 
 import { useAppDb } from "#/context/dbs-reducer";
 import { useAppLogDispatch } from "#/context/logs-reducer";
@@ -14,6 +14,7 @@ type Props = {
 export default function EventLogStoreController({ onRefresh, onAddEvent }: Props) {
 
     const [ value, setValue ] = useState('');
+    const [ pinData, setPinData ] = useState(false);
     const { id } = useParams();
     const { findDb } = useAppDb();
     const dispatch = useAppLogDispatch();
@@ -32,10 +33,11 @@ export default function EventLogStoreController({ onRefresh, onAddEvent }: Props
             //* This is the data we want to add to the db, it up to you to shape it, here is an example:
             const input = {
                 value: value,
+                pin: pinData,
                 timestamp: Date.now()
             }
 
-            const hash = await addEntry(dbEntry?.payload.value.address, { pin: false, entry: input });
+            const hash = await addEntry(dbEntry?.payload.value.address, { pin: pinData, entry: input });
 
             onAddEvent(hash);
             dispatch({
@@ -69,6 +71,15 @@ export default function EventLogStoreController({ onRefresh, onAddEvent }: Props
                 onChange={(e) => setValue(e.target.value)}
             >
             </Input>
+            <Checkbox
+                isChecked={pinData}
+                width={{ base: '100%', md: 'auto' }}
+                onChange={(e) => {
+                    setPinData(e.target.checked);
+                }}
+            >
+                Pin
+            </Checkbox>
             <Button
                 variant={"outline"}
                 onClick={onRefresh}

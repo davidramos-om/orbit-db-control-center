@@ -76,6 +76,7 @@ export default function DocStoreController({ dbAddress, dbName, onRefresh, onEnt
                 _id: id,
                 document: jsonDocument,
                 strictMode: strictMode,
+                pin: pinData,
                 timestamp: Date.now()
             }
 

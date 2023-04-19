@@ -17,6 +17,7 @@ export default function FeedStoreController({ dbAddress, dbName, onRefresh, onEn
 
     const [ value, setValue ] = useState('');
     const [ strictMode, setStrictMode ] = useState(true);
+    const [ pinData, setPinData ] = useState(false);
     const [ disableInput, setDisableInput ] = useState(false);
     const toast = useToast();
 
@@ -56,10 +57,11 @@ export default function FeedStoreController({ dbAddress, dbName, onRefresh, onEn
             const input = {
                 document: strictMode ? JSON.parse(value) : value,
                 strictMode: strictMode,
+                pin: pinData,
                 timestamp: Date.now()
             }
 
-            const hash = await addEntry(dbAddress, { pin: false, entry: input });
+            const hash = await addEntry(dbAddress, { pin: pinData, entry: input });
 
             onEntryAdded(hash);
             dispatch({
@@ -126,6 +128,15 @@ export default function FeedStoreController({ dbAddress, dbName, onRefresh, onEn
                         </InputRightElement>
                     </InputGroup>
                 </Stack>
+                <Checkbox
+                    isChecked={pinData}
+                    width={{ base: '100%', md: 'auto' }}
+                    onChange={(e) => {
+                        setPinData(e.target.checked);
+                    }}
+                >
+                    Pin
+                </Checkbox>
                 <Checkbox
                     isChecked={strictMode}
                     width={{ base: '100%', md: 'auto' }}
