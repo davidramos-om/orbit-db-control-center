@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { ViewIcon } from '@chakra-ui/icons';
 import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button, Code, IconButton, useDisclosure } from "@chakra-ui/react";
 
@@ -9,7 +9,28 @@ type Props = {
 export default function ShowEntryPayload({ payload }: Props) {
 
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const [ copied, setCopied ] = useState<boolean>(false);
     const cancelRef = useRef();
+
+    const handleCopyToClipboard = () => {
+
+        if (!navigator.clipboard) {
+            alert('Clipboard API not supported');
+            return;
+        }
+
+        if (!payload) {
+            alert('No data to copy');
+            return;
+        }
+
+        navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+        setCopied(true);
+
+        setTimeout(() => {
+            setCopied(false);
+        }, 2000);
+    }
 
     return (
         <>
@@ -48,7 +69,16 @@ export default function ShowEntryPayload({ payload }: Props) {
                             </Code>
                         </AlertDialogBody>
 
-                        <AlertDialogFooter>
+                        <AlertDialogFooter
+                            gap={2}
+                        >
+                            <Button
+                                variant="ghost"
+                                colorScheme={copied ? 'green' : 'gray'}
+                                onClick={handleCopyToClipboard}
+                            >
+                                {copied ? 'Copied' : 'Copy'}
+                            </Button>
                             <Button ref={cancelRef as any} onClick={onClose}>
                                 Dismiss
                             </Button>
