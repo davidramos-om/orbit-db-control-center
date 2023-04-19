@@ -34,8 +34,17 @@ export default function ShowEntryPayload({ payload }: Props) {
                         <AlertDialogBody
                             overflow='scroll'
                         >
-                            <Code>
-                                <pre>{JSON.stringify(payload || {}, null, 2)}</pre>
+                            <Code
+                                width="100%"
+                            >
+                                <pre
+                                    style={{
+                                        overflow: "scroll",
+
+                                    }}
+                                >
+                                    {JSON.stringify(payload || {}, null, 2)}
+                                </pre>
                             </Code>
                         </AlertDialogBody>
 
