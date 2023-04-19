@@ -34,11 +34,14 @@
     "vite-tsconfig-paths": "4.0.7"
   },
   "devDependencies": {
+    "@commitlint/cli": "^17.6.1",
+    "@commitlint/config-conventional": "^17.6.1",
     "@types/orbit-db": "https://github.com/orbitdb/orbit-db-types.git",
     "@types/react": "18.0.31",
     "@types/react-dom": "18.0.11",
     "@types/uuid": "9.0.1",
     "@vitejs/plugin-react": "3.1.0",
+    "husky": "^8.0.3",
     "typescript": "5.0.3",
     "vite": "4.2.1",
     "vite-plugin-eslint": "1.8.1"
