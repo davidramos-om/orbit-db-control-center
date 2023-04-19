@@ -48,6 +48,12 @@ export const initIPFS = async () => {
           clearInterval(interval);
           resolve(ipfs)
         }
+
+        if (!starting_ipfs) {
+          clearInterval(interval);
+          reject('IPFS not initialized');
+        }        
+
       }, 100)
     });
 

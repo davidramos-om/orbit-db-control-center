@@ -112,7 +112,7 @@ export const addEntry = async (address: string, options: addEntryOptions) => {
     if (!db)
         return null;
 
-    const { pin = false, entry } = options || {};
+    const { pin, entry } = options || {};
     const key = Object.keys(entry)[ 0 ];
     const value = entry[ key ];
 
@@ -138,9 +138,9 @@ export const addEntry = async (address: string, options: addEntryOptions) => {
             const theKey = entry.key;
             const _entry = { ...entry };
             delete _entry[ 'key' ];
-            return db.put(theKey, _entry);
+            return db.put(theKey, _entry, { pin });
         case 'counter':
-            return db.inc(value);
+            return db.inc(value, { pin });
         default:
             return null;
     }

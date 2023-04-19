@@ -34,7 +34,7 @@ export default function CounterDbPage() {
     }, [ readCounter ]);
 
 
-    const handleIncrement = async (value: number) => {
+    const handleIncrement = async (value: number, pin: boolean) => {
 
         if (Number(value || 0) <= 0) {
             showAlert({
@@ -47,7 +47,7 @@ export default function CounterDbPage() {
         if (!dbEntry)
             return;
 
-        const hash = await addEntry(dbEntry?.payload.value.address, { pin: false, entry: { value: value } });
+        const hash = await addEntry(dbEntry?.payload.value.address, { pin, entry: { value: value } });
         dispatch({
             type: 'add',
             log: {

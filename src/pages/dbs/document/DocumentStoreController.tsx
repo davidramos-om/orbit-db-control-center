@@ -20,6 +20,7 @@ export default function DocStoreController({ dbAddress, dbName, onRefresh, onEnt
     const [ id, setId ] = useState('');
     const [ strictMode, setStrictMode ] = useState(true);
     const [ disableInput, setDisableInput ] = useState(false);
+    const [ pinData, setPinData ] = useState(false);
     const toast = useToast();
 
     const dispatch = useAppLogDispatch();
@@ -78,7 +79,7 @@ export default function DocStoreController({ dbAddress, dbName, onRefresh, onEnt
                 timestamp: Date.now()
             }
 
-            const hash = await addEntry(dbAddress, { pin: false, entry: input });
+            const hash = await addEntry(dbAddress, { pin: pinData, entry: input });
             onEntryAdded(id);
             dispatch({
                 type: 'add',
@@ -151,6 +152,15 @@ export default function DocStoreController({ dbAddress, dbName, onRefresh, onEnt
                         </InputRightElement>
                     </InputGroup>
                 </Stack>
+                <Checkbox
+                    isChecked={pinData}
+                    width={{ base: '100%', md: 'auto' }}
+                    onChange={(e) => {
+                        setPinData(e.target.checked);
+                    }}
+                >
+                    Pin
+                </Checkbox>
                 <Checkbox
                     isChecked={strictMode}
                     width={{ base: '100%', md: 'auto' }}

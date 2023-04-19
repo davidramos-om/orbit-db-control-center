@@ -40,8 +40,15 @@ const HeaderLayout = ({ children }: Props) => {
                                 name="Orbit"
                                 src="/orbit-db.png"
                             />
-                            <Heading>
+                            <Heading
+                                display={{ base: 'none', md: 'block' }}
+                            >
                                 OrbitDB Control Center
+                            </Heading>
+                            <Heading
+                                display={{ base: 'block', md: 'none' }}
+                            >
+                                OrbitDB CC
                             </Heading>
                         </HStack>
                     </Link>
@@ -61,8 +68,10 @@ const HeaderLayout = ({ children }: Props) => {
                     alignItems='center'
                     gap='2'
                 >
-                    <HStack spacing={1} p={2}>
-                        <Text as="b">System Status:</Text>
+                    <HStack
+                        spacing={1} p={2}
+                    >
+                        <Text as="b">Node Status:</Text>
                         <Systems />
                     </HStack>
                 </Flex>

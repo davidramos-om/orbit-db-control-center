@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { Button, Input, Stack } from "@chakra-ui/react";
+import { Button, Input, Stack, Checkbox } from "@chakra-ui/react";
 
 type IncrementerProps = {
-    onIncrement: (value: number) => void
+    onIncrement: (value: number, pin: boolean) => void
 }
 
 export default function IncrementerController({ onIncrement }: IncrementerProps) {
 
     const [ value, setValue ] = useState(1);
+    const [ pinData, setPinData ] = useState(false);
 
     return (
         <Stack
@@ -18,10 +19,19 @@ export default function IncrementerController({ onIncrement }: IncrementerProps)
                 value={value}
                 onChange={(e) => setValue(parseInt(e.target.value))}
             />
+            <Checkbox
+                isChecked={pinData}
+                width={{ base: '100%', md: 'auto' }}
+                onChange={(e) => {
+                    setPinData(e.target.checked);
+                }}
+            >
+                Pin
+            </Checkbox>
             <Button
                 variant={"outline"}
                 colorScheme="blackAlpha"
-                onClick={() => onIncrement(value)}
+                onClick={() => onIncrement(value, pinData)}
             >
                 Increment
             </Button>
