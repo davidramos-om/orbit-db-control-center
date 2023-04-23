@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Badge, Card, CardBody, CardHeader, HStack, Heading, Icon, Stack, Text } from "@chakra-ui/react";
-import { CopyIcon, CheckIcon } from "@chakra-ui/icons";
+import { Badge, Card, CardBody, CardHeader, HStack, Heading, Icon, IconButton, Stack, Text, Tooltip } from "@chakra-ui/react";
+import { CopyIcon, CheckIcon, } from "@chakra-ui/icons";
 
+import SvgIconify from 'src/components/SvgIconify'
 import { DBType } from "#/lib/types";
+import { pinData } from "#/lib/manage-dbs";
 import { colorSchema } from './DbList'
 
 
@@ -22,6 +24,50 @@ type Props = {
 export default function DbInformation({ db, showEntriesCount = true }: Props) {
 
     const [ copied, setCopied ] = useState<boolean>(false);
+    const [ bafyCid, setBafyCid ] = useState<string>('');
+    const [ loading, setLoading ] = useState<boolean>(false);
+
+    const handleSyncPeersLocally = async () => {
+
+        try {
+            if (!db?.address)
+                return;
+
+            if (loading)
+                return;
+
+            setLoading(true);
+            const cid = await pinData(db?.address || '');
+            setBafyCid(cid.toString());
+        }
+        catch (error) {
+            console.log("pinData.error", error);
+        }
+        finally {
+            setLoading(false);
+        }
+    }
+
+    const handleSyncPeersRemotely = async () => {
+
+        try {
+            if (!db?.address)
+                return;
+
+            if (loading)
+                return;
+
+            setLoading(true);
+            // await pinDataRemotely(db?.address || '');
+        }
+        catch (error) {
+            console.log("pinData.error", error);
+        }
+        finally {
+            setLoading(false);
+        }
+    }
+
     const handleCopyToClipboard = () => {
 
         if (!navigator.clipboard) {
@@ -48,14 +94,41 @@ export default function DbInformation({ db, showEntriesCount = true }: Props) {
                 <HStack spacing='1'>
                     <Heading size='md'>{db?.address || '...'}</Heading>
                     {db?.address &&
+                        <>
                         <Icon onClick={handleCopyToClipboard}
                             cursor='pointer'
                             color={copied ? 'green.500' : 'gray.500'}
                             ml='auto'
                             as={copied ? CheckIcon : CopyIcon}
                         />
+                        <Tooltip
+                            label="Sync with local peers"
+                        >
+                            <IconButton
+                                variant="ghost"
+                                onClick={handleSyncPeersLocally}
+                                aria-label="sync database with local peers"
+                                cursor='pointer'
+                                ml='auto'
+                                icon={<SvgIconify icon='academicons:pubpeer-square' />}
+                            />
+                        </Tooltip>
+                        <Tooltip
+                            label="Sync with remote peers"
+                        >
+                            <IconButton
+                                variant="ghost"
+                                onClick={handleSyncPeersRemotely}
+                                aria-label="sync database with remote peers"
+                                cursor='pointer'
+                                ml='auto'
+                                icon={<SvgIconify icon='healthicons:lymph-nodes-negative' />}
+                            />
+                        </Tooltip>
+                    </>
                     }
                 </HStack>
+                {bafyCid && <Text> {bafyCid} </Text>}
             </CardHeader>
             <CardBody>
                 <Stack spacing='1'>
