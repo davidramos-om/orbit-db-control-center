@@ -1,11 +1,14 @@
 import { useRef } from "react";
 import {
     AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button,
-    FormControl, FormLabel, Input, ModalCloseButton, Select, Stack, useControllableState, useDisclosure, useToast
+    FormControl, FormLabel, Input, ModalCloseButton, Select, Stack, Divider, List, ListItem, Text, IconButton,
+    useControllableState, useDisclosure, useToast, HStack
 } from "@chakra-ui/react"
+import { DeleteIcon } from "@chakra-ui/icons";
 
 import { DBType, DBPermission, DbTypeExtendedDescription, DBPermissionExtendedDescription } from '#/lib/types';
 import { getProgramByHash } from "#/lib/manage-programs";
+import { getOrbitDB } from "#/lib/db";
 import { createDatabase } from "#/lib/manage-dbs";
 import { MapOrbitDbEntry } from "#/lib/mapper";
 import { useAppDbDispatch } from "#/context/dbs-reducer";
@@ -22,6 +25,12 @@ function CreateDbDialog() {
     const [ dbType, setDbType ] = useControllableState<DBType | ''>({ defaultValue: '' });
     const [ permission, setPermission ] = useControllableState<DBPermission | ''>({ defaultValue: '' });
 
+    const [ identity, setIdentity ] = useControllableState<string>({ defaultValue: '' });
+    const [ identities, setIdentities ] = useControllableState<string[]>({ defaultValue: [] });
+    const orbitdb = getOrbitDB();
+    const dbIdentity = orbitdb?.identity.id as string;
+
+
     const handleCreate = async () => {
         try {
 
@@ -35,10 +44,14 @@ function CreateDbDialog() {
                 return;
             }
 
+            if (!dbIdentity)
+                throw new Error('No identity found');
+
             const { hash } = await createDatabase({
                 name: db,
                 type: dbType,
-                permissions: permission
+                permissions: permission,
+                access: [ dbIdentity, ...identities ]
             });
 
             const program = getProgramByHash(hash);
@@ -72,6 +85,31 @@ function CreateDbDialog() {
         }
     }
 
+    const handleAddIdentity = () => {
+
+        if (!identity)
+            return;
+
+        if (identity === dbIdentity)
+            return;
+
+        setIdentities((prev) => {
+
+            if (prev.includes(identity))
+                return prev;
+
+            return [ ...prev, identity ];
+        });
+    }
+
+    const handleRemoveIdentity = (id: string) => () => {
+
+        if (id === dbIdentity)
+            return;
+
+        setIdentities((prev) => prev.filter((i) => i !== id));
+    }
+
     return (
         <>
             <Button
@@ -86,7 +124,7 @@ function CreateDbDialog() {
                 isOpen={isOpen}
                 leastDestructiveRef={cancelRef as any}
                 onClose={onClose}
-                size='xl'
+                size='2xl'
             >
                 <AlertDialogOverlay>
                     <AlertDialogContent>
@@ -114,7 +152,7 @@ function CreateDbDialog() {
                                     >
                                         {DbTypeExtendedDescription.map((item) => (
                                             <option key={item.type} value={item.type}>{`${item.type} : ${item.description}`}</option>
-                                        ))}                                        
+                                        ))}
                                     </Select>
                                 </FormControl>
                                 <FormControl id="permission">
@@ -129,6 +167,49 @@ function CreateDbDialog() {
                                         ))}
                                     </Select>
                                 </FormControl>
+                                {dbIdentity && permission === 'custom' && (
+                                    <FormControl id="custom-permission">
+                                        <Stack
+                                            direction={{ base: 'column', sm: 'row' }}
+                                        >
+                                            <Input
+                                                placeholder="Identity Id"
+                                                value={identity}
+                                                onChange={(e) => setIdentity(e.target.value)}
+                                            />
+                                            <Button
+                                                variant={"ghost"}
+                                                colorScheme='green'
+                                                onClick={handleAddIdentity}
+                                                ml={3}
+                                            >
+                                                Add
+                                            </Button>
+                                        </Stack>
+                                        <Divider my={3} />
+                                        <List
+                                            spacing={3}
+                                            minH={"20"}
+                                        >
+                                            {[ dbIdentity, ...identities ].map((pk) => (
+                                                <ListItem
+                                                    key={pk}
+                                                >
+                                                    <HStack>
+                                                        <IconButton
+                                                            variant="ghost"
+                                                            icon={<DeleteIcon />}
+                                                            aria-label="Delete"
+                                                            isDisabled={pk === dbIdentity}
+                                                            onClick={handleRemoveIdentity(pk)}
+                                                        />
+                                                        <Text>{pk}</Text>
+                                                    </HStack>
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    </FormControl>
+                                )}
                             </Stack>
                         </AlertDialogBody>
 
