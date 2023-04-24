@@ -1,6 +1,6 @@
 # orbit-db-control center
 
-This is a control center for orbit-db. It is a web interface that allows you to create and manage orbit-db instances.
+A control center for orbit-db. It is a web interface that allows you to create and manage orbit-db instances.
 
 ## Dashboard
 <img 
