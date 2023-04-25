@@ -24,7 +24,7 @@ export const getOneDatabase = async ({ address, load }: { address: string; load:
         db = await orbitdb.open(address, {
             localOnly: false, //* load from local storage
             create: false, //* create if doesn't exist
-            overwrite: false, //* overwrite if exists
+            overwrite: true, //* overwrite if exists
             replicate: true, //* replicate across peers            
         });
 
@@ -126,29 +126,29 @@ export const createDatabase = async (
     };
 
     let db: DataBaseInstance<unknown> | null = null;
-
+    let dbName = name + '.' + (orbitdb as any).identity.id;
     switch (type) {
         case DBType.keyvalue:
-            db = await orbitdb.keyvalue(name, options);
+            db = await orbitdb.keyvalue(dbName, options);
             break;
         case DBType.counter:
-            db = await orbitdb.counter(name, options);
+            db = await orbitdb.counter(dbName, options);
             break;
         case DBType.feed:
-            db = await orbitdb.feed(name, options);
+            db = await orbitdb.feed(dbName, options);
             break;
         case DBType.eventlog:
-            db = await orbitdb.eventlog(name, options);
+            db = await orbitdb.eventlog(dbName, options);
             break;
         case DBType.docstore:
-            db = await orbitdb.docstore(name, options);
+            db = await orbitdb.docstore(dbName, options);
             break;
         default:
             throw new Error('Invalid database type');
     }
 
     const hash = await program.add({
-        name,
+        name: dbName,
         type,
         address: db.address.toString(),
         added: Date.now()

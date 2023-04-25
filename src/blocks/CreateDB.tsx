@@ -167,7 +167,7 @@ function CreateDbDialog() {
                                         ))}
                                     </Select>
                                 </FormControl>
-                                {dbIdentity && permission === 'custom' && (
+                                {dbIdentity && (permission === 'custom') && (
                                     <FormControl id="custom-permission">
                                         <Stack
                                             direction={{ base: 'column', sm: 'row' }}

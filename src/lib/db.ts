@@ -1,5 +1,5 @@
 import OrbitDB from 'orbit-db';
-import { IPFS as tIPFS, create as createIPFSInstance } from 'ipfs-core';
+import { type IPFS, create as createIPFSInstance } from 'ipfs-core';
 import ipfsConfig from './ipfs-config'
 import { OrbitDbProgram } from "./types";
 
@@ -7,7 +7,7 @@ let orbitdb: OrbitDB | null = null; //* OrbitDB instance
 let program: OrbitDbProgram | null = null; //* Programs database
 
 //* Pinning node
-let ipfs_pinningNode: tIPFS | null = null;
+let ipfs_pinningNode: IPFS | null = null;
 let starting_ipfs = false;
 
 export function setProgream(_program: any) {
@@ -70,16 +70,16 @@ export const initIPFS = async () => {
   }
 }
 
-export const initOrbitDB = async (ipfs: tIPFS) => {
+export const initOrbitDB = async (ipfs: IPFS) => {
 
   if (orbitdb)
-    return orbitdb as OrbitDB;
+    return orbitdb;
 
   orbitdb = await OrbitDB.createInstance(ipfs, {
     directory: './orbitdb',
   });
 
-  return orbitdb as OrbitDB;
+  return orbitdb;
 }
 
 export const initPrograms = async () => {
@@ -105,7 +105,7 @@ export const initPrograms = async () => {
 }
 
 
-export function initDbSystem(): Promise<{ ipfs: tIPFS, orbitdb: OrbitDB }> {
+export function initDbSystem(): Promise<{ ipfs: IPFS, orbitdb: OrbitDB }> {
 
   return new Promise(async (resolve, reject) => {
 
@@ -123,7 +123,7 @@ export function initDbSystem(): Promise<{ ipfs: tIPFS, orbitdb: OrbitDB }> {
           reject('Programs database not initialized');
 
         resolve({
-          ipfs: ifps as tIPFS,
+          ipfs: ifps,
           orbitdb: db
         });
       }
