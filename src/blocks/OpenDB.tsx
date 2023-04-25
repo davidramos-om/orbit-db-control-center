@@ -1,11 +1,12 @@
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import {
     AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button,
     FormControl, FormLabel, Input, ModalCloseButton, Stack, useControllableState, useDisclosure, useToast,
 } from "@chakra-ui/react"
 
-import { addDatabase } from "#/lib/manage-dbs";
+import { connectToDb } from "#/lib/manage-dbs";
 import { useAppLogDispatch } from '#/context/logs-reducer';
+import { isValidDbAddress } from "#/lib/helper";
 
 type OpenDbProps = {
     onDbOpened: (hash: string) => void;
@@ -18,11 +19,13 @@ function OpenDbDialog({ onDbOpened }: OpenDbProps) {
     const [ dbAddress, setDbAddress ] = useControllableState({ defaultValue: '' });
     const cancelRef = useRef();
     const dispatch = useAppLogDispatch();
+    const [ loading, setLoading ] = useState<boolean>(false);
 
     const handleOpenDb = async () => {
         try {
 
             if (!dbAddress) {
+                toast.closeAll();
                 toast({
                     position: 'top',
                     description: 'Please enter database address',
@@ -32,8 +35,19 @@ function OpenDbDialog({ onDbOpened }: OpenDbProps) {
                 return;
             }
 
-            const { hash } = await addDatabase(dbAddress);
+            if (!isValidDbAddress(dbAddress)) {
+                toast.closeAll();
+                toast({
+                    position: 'top',
+                    description: 'Invalid database address',
+                    status: 'error',
+                    isClosable: true,
+                });
+                return;
+            }
 
+            setLoading(true);
+            const { hash } = await connectToDb(dbAddress);
             dispatch({
                 type: 'add',
                 log: {
@@ -47,6 +61,14 @@ function OpenDbDialog({ onDbOpened }: OpenDbProps) {
         }
         catch (error: any) {
 
+            toast.closeAll();
+            toast({
+                position: 'top',
+                description: 'Unable to connect to database,please check output for more details',
+                status: 'error',
+                isClosable: true,
+            });
+
             dispatch({
                 type: 'add',
                 log: {
@@ -54,6 +76,9 @@ function OpenDbDialog({ onDbOpened }: OpenDbProps) {
                     type: 'error',
                 }
             });
+        }
+        finally {
+            setLoading(false);
         }
     }
 
@@ -71,7 +96,7 @@ function OpenDbDialog({ onDbOpened }: OpenDbProps) {
                 isOpen={isOpen}
                 leastDestructiveRef={cancelRef as any}
                 onClose={onClose}
-                size='xl'                
+                size='xl'
             >
                 <AlertDialogOverlay>
                     <AlertDialogContent>
@@ -101,6 +126,8 @@ function OpenDbDialog({ onDbOpened }: OpenDbProps) {
                                 colorScheme='pink'
                                 onClick={handleOpenDb}
                                 ml={3}
+                                isLoading={loading}
+                                loadingText='Connecting'
                             >
                                 Connect
                             </Button>
