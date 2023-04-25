@@ -126,7 +126,7 @@ export const createDatabase = async (
     };
 
     let db: DataBaseInstance<unknown> | null = null;
-    let dbName = name + '.' + (orbitdb as any).identity.id;
+    let dbName = name;// + '.' + ((orbitdb as any).identity.id);
     switch (type) {
         case DBType.keyvalue:
             db = await orbitdb.keyvalue(dbName, options);
