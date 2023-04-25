@@ -5,10 +5,12 @@ import RegreshDataBases from "#/blocks/RefreshDBs";
 import OpenDataBase from "#/blocks/OpenDB";
 import DataBaseList, { DBRow } from "#/blocks/DbList";
 import { useAppDb } from "#/context/dbs-reducer";
+import { getOrbitDB } from '#/lib/db'
 
 const HomePage = () => {
 
     const { dbs } = useAppDb();
+    const dbInstance = getOrbitDB();
 
     const rows = dbs.map((db) => {
 
@@ -20,7 +22,8 @@ const HomePage = () => {
             name: db.payload.value.name,
             address: db.payload.value.address,
             date: new Date(db.payload.value.added || 0),
-            type: db.payload.value.type
+            type: db.payload.value.type,
+            external: db.identity.id !== (dbInstance ? String((dbInstance as any).identity?.id) : '')
         }
 
         return _r;
