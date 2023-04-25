@@ -77,7 +77,7 @@ export const fetchEntries = async (address: string, options: fetchDbOptions = {
         fullOp: false
     },
     query: {
-        limit: 10,
+        limit: -1,
         gt: '',
         gte: '',
         lt: '',

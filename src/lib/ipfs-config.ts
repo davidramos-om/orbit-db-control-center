@@ -9,13 +9,13 @@ const ipfsConfig: Options = {
   preload: {
     enabled: true
   },
-  // relay: {
-  //   enabled: true, //? enable circuit relay dialer and listener
-  //   hop: {
-  //     enabled: true, //? enable circuit relay HOP (make this node a relay)
-  //     active: true
-  //   }
-  // },
+  relay: {
+    enabled: true, //? enable circuit relay dialer and listener
+    hop: {
+      enabled: true, //? enable circuit relay HOP (make this node a relay)
+      active: true
+    }
+  },
   EXPERIMENTAL: {
     ipnsPubsub: true,
     sharding: true,

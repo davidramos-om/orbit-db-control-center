@@ -19,7 +19,6 @@ export const getProgramByHash = (multiHash: string): OrbitDbProgram => {
     if (program && orbitdb) {
 
         const db = program.iterator({ limit: -1 }).collect().find((db: any) => {
-            console.log('getProgramByHash : ', { db });
             return db.hash === multiHash;
         });
 

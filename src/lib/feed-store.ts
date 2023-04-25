@@ -26,8 +26,6 @@ export async function addEntry({ feedstore, entry, pin }: AddFeedEntryArgs) {
             throw new Error('IPFS not initialized');
 
         const cid = await ipfs.pin.add(hash);
-        console.log(`🔥feed-store.cid`, cid, cid.toString());
-
         await pinDataRemotely(cid);
     }
 

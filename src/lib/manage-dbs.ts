@@ -105,11 +105,8 @@ export const createDatabase = async (
             let write = [ ...access ];
             const myId = (orbitdb as any).identity.id;
 
-            // Give write access to ourselves
             if (!write.includes(myId))
                 write = [ ...access, myId ];
-
-            console.log(`🐛  -> 🔥 :  write:`, write);
 
             accessController = {
                 // type: 'orbitdb',
@@ -211,7 +208,6 @@ export async function pinDataRemotely(cid: CID<unknown, number, number, Version>
     return await addRemotePins(ipfs, SERVICE, [ cid ]);
 
     // const isRegisted = await isServiceRegistered(ipfs, SERVICE);
-    // console.log(`🐛  -> 🔥 :  pinDataRemotely 🔥 :  isRegisted:`, isRegisted);
 
     // if (!isRegisted) {
     //     await ipfs.pin.remote.service.add(SERVICE, {
@@ -229,7 +225,7 @@ export async function pinDataRemotely(cid: CID<unknown, number, number, Version>
     //     endpoint: new URL('https://api.pinata.cloud'),
     //     key: '4c821c02e3e0fd570f343f05713ef54fbcb7649f3c2c6d61893ac44eea52f569',
     // };
-    // console.log(`🐛  -> 🔥 :  pinDataRemotely 🔥 :  credentials:`, credentials);
+
     // return ipfs.pin.remote.service.add('pinata', credentials)
     //     .then(() => ipfs.pin.remote.add(cid, { service: 'pinata' }));
 
@@ -273,8 +269,6 @@ export async function grantAccess(dbAddress: string, IdentityIds: string[]) {
         throw new Error('OrbitDB not initialized');
 
     let db = await getOneDatabase({ address: dbAddress, load: false });
-    console.log(`🐛  -> 🔥 :  grantAccess 🔥 :  db:`, db);
-
     if (!db)
         throw new Error('Database not found');
 
@@ -287,16 +281,10 @@ export async function grantAccess(dbAddress: string, IdentityIds: string[]) {
         }
     });
 
-
-
     const currentAccess = dbAny.access?.write?.map((p: any) => String(p)) || [];
-    console.log(`🐛  -> 🔥 :  grantAccess 🔥 :  currentAccess:`, currentAccess);
-
     const newAccess = currentAccess.concat(IdentityIds.filter((id) => !currentAccess.includes(String(id))));
+
     for (const id of newAccess) {
-        console.log(`🐛  -> 🔥 :  grantAccess 🔥 :  id:`, id);
         await dbAny.access.grant('write', id);
     }
-
-    console.log('print new acccess:', db);
 }
