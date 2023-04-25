@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import { useParams } from 'react-router-dom';
-import { Button, Input, Stack, Checkbox } from "@chakra-ui/react";
+import { Button, Input, Stack, Checkbox, useToast } from "@chakra-ui/react";
 
 import { useAppDb } from "#/context/dbs-reducer";
 import { useAppLogDispatch } from "#/context/logs-reducer";
-import { addEntry } from "#/lib/manage-entries";
+import { addEntry } from "#/lib/manage-entries"; 
 
 type Props = {
     onRefresh: () => void;
@@ -18,6 +18,7 @@ export default function EventLogStoreController({ onRefresh, onAddEvent }: Props
     const { id } = useParams();
     const { findDb } = useAppDb();
     const dispatch = useAppLogDispatch();
+    const toast = useToast()
     const dbEntry = useMemo(() => findDb(id || ''), [ id, findDb ]);
 
     const handleAddEvent = async () => {
@@ -37,7 +38,7 @@ export default function EventLogStoreController({ onRefresh, onAddEvent }: Props
                 timestamp: Date.now()
             }
 
-            const hash = await addEntry(dbEntry?.payload.value.address, { pin: pinData, entry: input });
+            const hash = await addEntry(dbEntry.payload.value.address, { pin: pinData, entry: input });
 
             onAddEvent(hash);
             dispatch({
@@ -50,6 +51,15 @@ export default function EventLogStoreController({ onRefresh, onAddEvent }: Props
             });
         }
         catch (error: any) {
+
+            toast.closeAll();
+            toast({
+                status: 'error',
+                title: 'Error',
+                description: 'Failed to add entry, please check output for more details',
+                isClosable: true,
+            });
+
             dispatch({
                 type: 'add',
                 log: {

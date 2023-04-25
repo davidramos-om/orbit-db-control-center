@@ -18,7 +18,7 @@ export default function FeedStoreController({ dbAddress, dbName, onRefresh, onEn
     const [ value, setValue ] = useState('');
     const [ strictMode, setStrictMode ] = useState(true);
     const [ pinData, setPinData ] = useState(false);
-    const [ disableInput, setDisableInput ] = useState(false);
+    const [ disableInput, setDisableInput ] = useState(false);    
     const toast = useToast();
 
     const dispatch = useAppLogDispatch();
@@ -74,6 +74,15 @@ export default function FeedStoreController({ dbAddress, dbName, onRefresh, onEn
             });
         }
         catch (error: any) {
+
+            toast.closeAll();
+            toast({
+                status: 'error',
+                title: 'Error',
+                description: 'Failed to add entry, please check output for more details',
+                isClosable: true,
+            });
+
             dispatch({
                 type: 'add',
                 log: {

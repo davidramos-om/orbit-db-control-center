@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useParams } from 'react-router-dom';
-import { Button, Input, Stack, Checkbox } from "@chakra-ui/react";
+import { Button, Input, Stack, Checkbox, useToast } from "@chakra-ui/react";
 
 import { useAppDb } from "#/context/dbs-reducer";
 import { useAppLogDispatch } from "#/context/logs-reducer";
@@ -16,6 +16,7 @@ export default function KeyValueStoreController({ onRefresh, onAddEvent }: Props
     const [ value, setValue ] = useState('');
     const [ key, setKey ] = useState('');
     const [ pinData, setPinData ] = useState(false);
+    const toast = useToast()
 
     const { id } = useParams();
     const { findDb } = useAppDb();
@@ -56,6 +57,15 @@ export default function KeyValueStoreController({ onRefresh, onAddEvent }: Props
             });
         }
         catch (error: any) {
+
+            toast.closeAll();
+            toast({
+                status: 'error',
+                title: 'Error',
+                description: 'Failed to add entry, please check output for more details',
+                isClosable: true,
+            });
+
             dispatch({
                 type: 'add',
                 log: {
