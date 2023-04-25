@@ -13,11 +13,13 @@ export function OrbitDbSystemInfo({ open, orbitDb, onClose }: Props) {
     const cancelRef = useRef();
     const [ info, setInfo ] = useState<{
         id: string;
+        key: string;
         identityId: string;
         directory: string;
         publicKey: string;
     }>({
         id: '',
+        key: '',
         identityId: '',
         publicKey: '',
         directory: '',
@@ -33,6 +35,7 @@ export function OrbitDbSystemInfo({ open, orbitDb, onClose }: Props) {
             const dbAny = orbitDb as any;
             setInfo({
                 id: dbAny.id || '',
+                key: dbAny.key || '',
                 identityId: dbAny.identity.id || '',
                 publicKey: dbAny.identity.publicKey || '',
                 directory: dbAny.directory || '',
@@ -68,7 +71,10 @@ export function OrbitDbSystemInfo({ open, orbitDb, onClose }: Props) {
                             <b>Id:</b> {info.id}
                         </ListItem>
                         <ListItem>
-                            <b>Identity Id:</b> {info.identityId}
+                            <b>Key:</b> {info.key}
+                        </ListItem>
+                        <ListItem>
+                            <b>Identity/Peer Id:</b> {info.identityId}
                         </ListItem>
                         <ListItem>
                             <b>Public Key:</b> {info.publicKey}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useToken } from "@chakra-ui/react";
+import { useToken, chakra, useDisclosure } from "@chakra-ui/react";
 import { type IPFS, } from "ipfs-core";
 
 import { useAppLogDispatch } from "#/context/logs-reducer";
@@ -7,6 +7,7 @@ import useIsMounted from "#/hooks/useIsMounted";
 import { SystemState } from "#/lib/types";
 import { initIPFS } from "#/lib/db";
 
+import { IFPSSystemInfo } from "./IFPSSystemInfo";
 import { SytemStatusIcon } from "./SytemStatusIcon";
 
 type Props = {
@@ -18,6 +19,7 @@ export function IFPSSystem({ onIpfsReady }: Props) {
     const dispatch = useAppLogDispatch();
     const isMounted = useIsMounted();
 
+    const { isOpen, onClose, onOpen } = useDisclosure(); 
     const [ dbState, setDbState ] = useState<SystemState>(SystemState.connecting);
     const [ ipfs, setIpfs ] = useState<IPFS | null>(null);
 
@@ -47,12 +49,22 @@ export function IFPSSystem({ onIpfsReady }: Props) {
                     if (!isMounted())
                         return;
 
-                    onIpfsReady(ipfs);
-
+                    onIpfsReady(ipfs);                    
                     dispatch({
                         type: 'add',
                         log: {
                             text: `Connected to IPFS`,
+                            type: 'connected'
+                        }
+                    });
+
+                    const repo = await ipfs.repo.stat();
+                    const id = await ipfs.id();
+
+                    dispatch({
+                        type: 'add',
+                        log: {
+                            text: `IPFS node | pubkey:${id.publicKey} | agent:${id.agentVersion} | protocol: ${id.protocolVersion} | repo:${repo.repoPath}`,
                             type: 'connected'
                         }
                     });
@@ -101,8 +113,32 @@ export function IFPSSystem({ onIpfsReady }: Props) {
     }, [ ipfs ]);
 
 
+    const handleOpen = () => {
+
+        if (!ipfs)
+            return;
+
+        if (dbState !== SystemState.connected)
+            return;
+
+        onOpen();
+    }
+
     return (
-        <SytemStatusIcon label="IPFS" color={color} />
+        <chakra.div
+            cursor={ipfs ? 'pointer' : 'default'}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            onClick={handleOpen}
+        >
+            <SytemStatusIcon label="IPFS" color={color} />
+            <IFPSSystemInfo
+                ipfs={ipfs}
+                open={isOpen}
+                onClose={onClose}
+            />
+        </chakra.div>
     );
 }
 

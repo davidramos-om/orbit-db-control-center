@@ -56,8 +56,7 @@ export function IFPSSystemInfo({ open, ipfs, onClose }: Props) {
 
     }, [ ipfs ]);
 
-    if (!ipfs)
-        return null;
+
 
     return (
         <AlertDialog
