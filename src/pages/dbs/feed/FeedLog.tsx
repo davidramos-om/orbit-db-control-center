@@ -40,7 +40,7 @@ export default function FeedLog({ dbAddress, entries }: Props) {
             itemContent={(index, log: FeedStoreModel) => (
                 <RowItem
                     key={log.hash}
-                    index={index}
+                    index={index + 1}
                     dbAddress={dbAddress}
                     log={log}
                 />

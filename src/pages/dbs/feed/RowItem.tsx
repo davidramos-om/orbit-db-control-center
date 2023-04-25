@@ -50,7 +50,7 @@ export function RowItem({ index, dbAddress, log }: RowItemProps) {
 
     return (
         <>
-            <Td w={100} textAlign="center"> {index + 1}</Td>
+            <Td w={100} textAlign="center"> {index}</Td>
             <Td w={50} textAlign="center">
                 <HStack>
                     <ShowEntryPayload payload={log.payload} />

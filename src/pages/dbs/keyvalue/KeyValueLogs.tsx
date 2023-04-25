@@ -47,7 +47,7 @@ export default function KeyValueLogs({ entries }: Props) {
             )}
             itemContent={(index, log: KeyValueModel) => (
                 <>
-                    <Td w={100} textAlign="center" > {index}</Td>
+                    <Td w={100} textAlign="center" > {index + 1}</Td>
                     <Td w={100} textAlign="center" >
                         <ShowEntryPayload payload={log.payload} />
                     </Td>
