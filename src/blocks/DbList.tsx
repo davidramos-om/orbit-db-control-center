@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { Badge, IconButton } from '@chakra-ui/react';
+import { Badge, IconButton, Stack } from '@chakra-ui/react';
 import { ViewIcon, DeleteIcon, CloseIcon, SettingsIcon } from '@chakra-ui/icons'
 import { useNavigate } from "react-router-dom";
 
@@ -9,6 +9,7 @@ import { PATH } from '#/routes';
 export type DBRow = {
     id: string;
     multiHash: string;
+    external: boolean;
     name: string;
     type: string;
     address: string;
@@ -58,18 +59,29 @@ const getColumns = ({ onDelete, onOpen }: getColumnsArgs): DataColumn[] => {
         name: 'Type',
         selector: 'type',
         type: 'node',
-        renderRowNode: (row: any) => <Badge
-            variant="subtle"
+        renderRowNode: (row: any) =>
+            <Stack>
+                <Badge
+                    variant="subtle"
+                    width="fit-content"
             colorScheme={colorSchema[ row.type ] || 'yellow'}
-        >
+                >
             {row.type}
-        </Badge>
-
+                </Badge>
+                <Badge
+                    variant="subtle"
+                    colorScheme="gray"
+                    width="fit-content"
+                >
+                    {row.external ? 'opened' : 'local'}
+                </Badge>
+            </Stack>
     },
     {
         name: 'Address',
         selector: 'address',
         type: 'string',
+
     },
     {
         name: 'Date',
