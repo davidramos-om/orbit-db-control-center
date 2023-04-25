@@ -88,7 +88,7 @@ export function OrbitDbSystemInfo({ open, orbitDb, onClose }: Props) {
                                 variant="ghost"
                                 colorScheme="blue"
                                 onClick={() => {
-                                    console.info('OrbitDbSystemInfo.orbit-db', orbitDb);
+                                    console.info({ OrbitDbInstance: orbitDb });
                                 }}
                             >
                                 Print to console
