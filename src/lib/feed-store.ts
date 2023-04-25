@@ -2,6 +2,9 @@ import type FeedStore from 'orbit-db-feedstore';
 import { validateParams } from './helper';
 import { IteratorQueryOptions } from './manage-entries';
 
+import { getIPFS } from './db';
+import { pinDataRemotely } from './manage-dbs';
+
 //* More info on the FeedStore API: https://github.com/orbitdb/orbit-db/blob/main/API.md#orbitdbfeednameaddress
 
 interface AddFeedEntryArgs {
@@ -16,6 +19,18 @@ export async function addEntry({ feedstore, entry, pin }: AddFeedEntryArgs) {
 
     //* type is not updated, add mehtod support options : {} parameter
     const hash = await (feedstore as any).add(entry, { pin });
+
+    if (pin) {
+        const ipfs = getIPFS();
+        if (!ipfs)
+            throw new Error('IPFS not initialized');
+
+        const cid = await ipfs.pin.add(hash);
+        console.log(`🔥feed-store.cid`, cid, cid.toString());
+
+        await pinDataRemotely(cid);
+    }
+
     return hash;
 }
 

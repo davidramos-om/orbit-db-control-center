@@ -1,4 +1,5 @@
 import OrbitDB from 'orbit-db';
+import { CID } from 'multiformats/cid';
 
 export function validateParams(params: Record<string, any>) {
 
@@ -12,22 +13,52 @@ export function validateParams(params: Record<string, any>) {
 
 export function isValidDbAddress(address: string) {
 
-    if (address && address.startsWith('orbitdb')) {
-        const parts = address.split('/');
+    if (address && address.startsWith('/orbitdb')) {
 
+        const parts = address.split('/');
         const vAddress = OrbitDB.isValidAddress(address);
         if (!vAddress)
             return false;
 
-        const type = parts[ 2 ];
-        if (OrbitDB.databaseTypes.indexOf(type) === -1)
+        const id = parts[ 2 ];
+        if (id && (id.toLowerCase().startsWith('qm') && id.toLowerCase().startsWith('zd')))
             return false;
 
-        const vName = parts[ 3 ] && parts[ 3 ].length > 0;
-        const vId = parts[ 4 ] && parts[ 4 ].length > 0;
-
+        const vId = Boolean(id) && id.length > 0;
+        const vName = Boolean(parts[ 3 ]) && parts[ 3 ].length > 0;        
         return vName && vId;
     }
 
     return false;
+}
+
+export function parseOrbitDbAddress(address: string) {
+
+    if (isValidDbAddress(address)) {
+
+        const parts = address.split('/');
+        return {
+            protocol: parts[ 1 ],
+            cid: parts[ 2 ],
+            name: parts[ 3 ],
+        };
+    }
+
+    return null;
+}
+
+
+export function decodeCID(bafyCidString: string) {
+
+    if (!bafyCidString)
+        return null;
+
+    const pcid = CID.parse(bafyCidString)
+
+    return {
+        cid: pcid.toString(),
+        codec: pcid.code,
+        version: pcid.version,
+        multihash: pcid.multihash
+    }
 }

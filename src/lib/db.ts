@@ -1,13 +1,13 @@
 import OrbitDB from 'orbit-db';
-import { type IPFS, create as createIPFSInstance } from 'ipfs-core';
-
-import config from './ipfs-config'
+import { IPFS as tIPFS, create as createIPFSInstance } from 'ipfs-core';
+import ipfsConfig from './ipfs-config'
 import { OrbitDbProgram } from "./types";
 
-let orbitdb: any | null = null; //* OrbitDB instance
+let orbitdb: OrbitDB | null = null; //* OrbitDB instance
 let program: OrbitDbProgram | null = null; //* Programs database
-let ipfs: IPFS | null = null; //* IPFS instance
 
+//* Pinning node
+let ipfs_pinningNode: tIPFS | null = null;
 let starting_ipfs = false;
 
 export function setProgream(_program: any) {
@@ -23,53 +23,62 @@ export async function loadProgram() {
     await program.load();
 }
 
-export function getOrbitDB() {
+export function getOrbitDB(): OrbitDB | null {
   return orbitdb;
 }
 
 export function getIPFS() {
-  return ipfs;
+  return ipfs_pinningNode;
 }
 
 export function getInstances() {
-  return { ipfs, orbitdb, program };
+  return { ipfs: ipfs_pinningNode, orbitdb, program };
+}
+
+export function peerId() {
+
+  if (!orbitdb)
+    return (orbitdb as any).identity.id;
+
+  return null;
 }
 
 export const initIPFS = async () => {
 
-  if (ipfs)
-    return ipfs
+  try {
 
-  if (starting_ipfs)
+    if (ipfs_pinningNode)
+      return ipfs_pinningNode;
 
-    return new Promise((resolve, reject) => {
-      const interval = setInterval(() => {
-        if (ipfs) {
-          clearInterval(interval);
-          resolve(ipfs)
-        }
+    if (starting_ipfs)
+      return null;
 
-        if (!starting_ipfs) {
-          clearInterval(interval);
-          reject('IPFS not initialized');
-        }        
+    starting_ipfs = true;
+    ipfs_pinningNode = await createIPFSInstance(ipfsConfig);
 
-      }, 100)
-    });
+    starting_ipfs = false;
 
-  starting_ipfs = true;
-  ipfs = await createIPFSInstance(config.ipfs);
-  starting_ipfs = false;
 
-  return ipfs
+    return ipfs_pinningNode
+  }
+  catch (error) {
+    starting_ipfs = false;
+    throw error;
+  }
+  finally {
+    starting_ipfs = false;
+  }
 }
 
-export const initOrbitDB = async (ipfs: any) => {
+export const initOrbitDB = async (ipfs: tIPFS) => {
 
   if (orbitdb)
     return orbitdb as OrbitDB;
 
-  orbitdb = await OrbitDB.createInstance(ipfs, {});
+  orbitdb = await OrbitDB.createInstance(ipfs, {
+    directory: './orbitdb',
+  });
+
   return orbitdb as OrbitDB;
 }
 
@@ -82,9 +91,12 @@ export const initPrograms = async () => {
   if (!orbitdb)
     throw new Error('OrbitDB not initialized');
 
+
   program = await orbitdb.feed('network.programs', {
-      accessController: { write: [ orbitdb.identity.id ] },
-      create: true
+    accessController: {
+      write: [ (orbitdb as any).identity.id ]
+    },
+    create: true
   });
 
   await program.load();
@@ -93,7 +105,7 @@ export const initPrograms = async () => {
 }
 
 
-export function initDbSystem(): Promise<{ ipfs: IPFS, orbitdb: OrbitDB }> {
+export function initDbSystem(): Promise<{ ipfs: tIPFS, orbitdb: OrbitDB }> {
 
   return new Promise(async (resolve, reject) => {
 
@@ -111,10 +123,10 @@ export function initDbSystem(): Promise<{ ipfs: IPFS, orbitdb: OrbitDB }> {
           reject('Programs database not initialized');
 
         resolve({
-          ipfs: ifps as IPFS,
+          ipfs: ifps as tIPFS,
           orbitdb: db
         });
-        }
+      }
       else {
         reject('IPFS not initialized');
       }
@@ -125,4 +137,15 @@ export function initDbSystem(): Promise<{ ipfs: IPFS, orbitdb: OrbitDB }> {
   });
 }
 
+/**
+ Close databases, connections, pubsub and reset orbitdb state.
+*/
+export async function disconnectInstance() {
+
+  const orbit = getOrbitDB();
+  if (!orbit)
+    throw new Error('OrbitDB not initialized');
+
+  orbit.disconnect();
+}
 
