@@ -3,18 +3,10 @@ import { Badge, Card, CardBody, CardHeader, HStack, Heading, Icon, IconButton, S
 import { CopyIcon, CheckIcon, } from "@chakra-ui/icons";
 
 import SvgIconify from 'src/components/SvgIconify'
-import { DBType } from "#/lib/types";
 import { pinData } from "#/lib/manage-dbs";
 import { colorSchema } from './DbList'
+import { DbInformationGrantAccess, DbDetails } from './DbInformationGrantAccess';
 
-
-type DbDetails = {
-    address: string;
-    name: string;
-    type: DBType | 'none';
-    permissions: Record<string, string>[];
-    entriesCount: number;
-}
 
 type Props = {
     showEntriesCount?: boolean;
@@ -39,26 +31,6 @@ export default function DbInformation({ db, showEntriesCount = true }: Props) {
             setLoading(true);
             const cid = await pinData(db?.address || '');
             setBafyCid(cid.toString());
-        }
-        catch (error) {
-            console.log("pinData.error", error);
-        }
-        finally {
-            setLoading(false);
-        }
-    }
-
-    const handleSyncPeersRemotely = async () => {
-
-        try {
-            if (!db?.address)
-                return;
-
-            if (loading)
-                return;
-
-            setLoading(true);
-            // await pinDataRemotely(db?.address || '');
         }
         catch (error) {
             console.log("pinData.error", error);
@@ -113,18 +85,6 @@ export default function DbInformation({ db, showEntriesCount = true }: Props) {
                                 icon={<SvgIconify icon='academicons:pubpeer-square' />}
                             />
                         </Tooltip>
-                        <Tooltip
-                            label="Sync with remote peers"
-                        >
-                            <IconButton
-                                variant="ghost"
-                                onClick={handleSyncPeersRemotely}
-                                aria-label="sync database with remote peers"
-                                cursor='pointer'
-                                ml='auto'
-                                icon={<SvgIconify icon='healthicons:lymph-nodes-negative' />}
-                            />
-                        </Tooltip>
                     </>
                     }
                 </HStack>
@@ -149,6 +109,9 @@ export default function DbInformation({ db, showEntriesCount = true }: Props) {
                         </Text>
                     )}
                 </Stack>
+                <DbInformationGrantAccess
+                    db={db}
+                />
             </CardBody>
         </Card>
     );

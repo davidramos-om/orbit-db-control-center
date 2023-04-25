@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import {
     Button, Text, useDisclosure, useToast,
     UnorderedList, ListItem,
@@ -6,7 +6,7 @@ import {
 } from '@chakra-ui/react';
 
 import { DBType } from "#/lib/types";
-import { getOneDatabase, grantAccess } from "#/lib/manage-dbs";
+import { grantAccess } from "#/lib/manage-dbs";
 import { useAppLogDispatch } from "#/context/logs-reducer";
 
 export type DbDetails = {
@@ -30,28 +30,6 @@ export function DbInformationGrantAccess({ db }: Props) {
     const [ publicKey, setPublicKey ] = useState<string>('');
     const dispatch = useAppLogDispatch();
     const toast = useToast();
-
-    useEffect(() => {
-
-
-        const getDb = async () => {
-
-            if (!db?.address)
-                return;
-
-            const _db = await getOneDatabase({ address: db.address, load: true });
-            console.log(`🐛  -> 🔥 :  getDb 🔥 :  _db:`, _db);
-
-            if (!_db)
-                return;
-
-            // setAccess(_db.access.write);
-        }
-
-        getDb();
-
-    }, [ db?.address ])
-
 
     const handleGrantAccess = async () => {
 
@@ -131,7 +109,7 @@ export function DbInformationGrantAccess({ db }: Props) {
                 <AlertDialogOverlay>
                     <AlertDialogContent>
                         <AlertDialogHeader >
-                            Grant/Revoke access to <Code colorScheme="pink">{db.name}</Code> database
+                            Grant access to <Code colorScheme="pink">{db.name}</Code> database
                         </AlertDialogHeader>
                         <ModalCloseButton />
                         <AlertDialogBody>

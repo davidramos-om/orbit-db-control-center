@@ -28,7 +28,7 @@ function CreateDbDialog() {
     const [ identity, setIdentity ] = useControllableState<string>({ defaultValue: '' });
     const [ identities, setIdentities ] = useControllableState<string[]>({ defaultValue: [] });
     const orbitdb = getOrbitDB();
-    const dbIdentity = orbitdb?.identity.id as string;
+    const dbIdentity = orbitdb ? (orbitdb as any).identity.id as string : undefined;
 
 
     const handleCreate = async () => {
