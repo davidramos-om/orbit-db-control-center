@@ -6,6 +6,7 @@ import {
 
 import { connectToDb } from "#/lib/manage-dbs";
 import { useAppLogDispatch } from '#/context/logs-reducer';
+import { useSiteState } from '#/context/site-reducer';
 import { isValidDbAddress } from "#/lib/helper";
 
 type OpenDbProps = {
@@ -18,6 +19,7 @@ function OpenDbDialog({ onDbOpened }: OpenDbProps) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [ dbAddress, setDbAddress ] = useControllableState({ defaultValue: '' });
     const cancelRef = useRef();
+    const { orbitDbReady } = useSiteState();
     const dispatch = useAppLogDispatch();
     const [ loading, setLoading ] = useState<boolean>(false);
 
@@ -88,6 +90,7 @@ function OpenDbDialog({ onDbOpened }: OpenDbProps) {
                 variant={"ghost"}
                 colorScheme='pink'
                 onClick={onOpen}
+                isDisabled={!orbitDbReady}
             >
                 Open Database
             </Button>
@@ -114,6 +117,12 @@ function OpenDbDialog({ onDbOpened }: OpenDbProps) {
                                         value={dbAddress}
                                         onChange={(e) => setDbAddress(e.target.value)}
                                     />
+                                </FormControl>
+
+                                <FormControl id="info">
+                                    <FormLabel>
+                                        Please consider that replicating the database across peers may take a while.
+                                    </FormLabel>
                                 </FormControl>
                             </Stack>
                         </AlertDialogBody>

@@ -13,12 +13,14 @@ import { createDatabase } from "#/lib/manage-dbs";
 import { MapOrbitDbEntry } from "#/lib/mapper";
 import { useAppDbDispatch } from "#/context/dbs-reducer";
 import { useAppLogDispatch } from "#/context/logs-reducer";
+import { useSiteState } from "#/context/site-reducer";
 
 function CreateDbDialog() {
 
     const toast = useToast();
     const dispatch = useAppDbDispatch();
     const logDispatch = useAppLogDispatch();
+    const { orbitDbReady } = useSiteState();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const cancelRef = useRef();
     const [ db, setDb ] = useControllableState({ defaultValue: '' });
@@ -116,6 +118,7 @@ function CreateDbDialog() {
                 variant={"solid"}
                 colorScheme='pink'
                 onClick={onOpen}
+                isDisabled={!orbitDbReady}
             >
                 New Database
             </Button>

@@ -5,11 +5,13 @@ import { getAllPrograms } from "#/lib/manage-programs";
 import { MapOrbitDbEntry } from "#/lib/mapper";
 import { useAppDbDispatch } from "#/context/dbs-reducer";
 import { useAppLogDispatch } from "#/context/logs-reducer";
+import { useSiteState } from '#/context/site-reducer';
 
 export default function RegreshDataBases() {
 
     const dispatch = useAppDbDispatch();
     const logDispatch = useAppLogDispatch();
+    const { orbitDbReady } = useSiteState();
 
     const handleRegresh = async () => {
         try {
@@ -51,6 +53,7 @@ export default function RegreshDataBases() {
             variant={"outline"}
             colorScheme='pink'
             onClick={handleRegresh}
+            isDisabled={!orbitDbReady}
         >
             Refresh DataBases
         </Button>
