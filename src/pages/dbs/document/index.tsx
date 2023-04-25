@@ -31,7 +31,6 @@ export default function DocumentDbPage() {
                 setLoading(true);
 
             const _entries = await fetchEntries(dbAddress, {
-                dbInstance: null,
                 docsOptions: { fullOp: true },
                 query: { reverse: true, limit: -1 }
             });

@@ -92,6 +92,15 @@ export default function DocStoreController({ dbAddress, dbName, onRefresh, onEnt
             });
         }
         catch (error: any) {
+
+            toast.closeAll();
+            toast({
+                status: 'error',
+                title: 'Error',
+                description: 'Failed to add entry, please check output for more details',
+                isClosable: true,
+            });
+
             dispatch({
                 type: 'add',
                 log: {

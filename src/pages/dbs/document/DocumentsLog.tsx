@@ -37,7 +37,7 @@ export default function DocumentsLog({ dbAddress, entries }: Props) {
                     <Th w="calc(100% - 590px)">Value</Th>
                 </Tr>
             )}
-            itemContent={(index, log: DocStoreModel) => ( 
+            itemContent={(index, log: DocStoreModel) => (
                 <RowItem
                     key={log.id}
                     index={index}

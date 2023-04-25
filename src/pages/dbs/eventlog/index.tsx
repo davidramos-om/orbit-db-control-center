@@ -68,7 +68,7 @@ export default function EventLogDbPage() {
     }, [ dbAddress, isMounted ]);
 
     useEffect(() => {
-        fetchData(false);
+        fetchData(true);
     }, [ fetchData ]);
 
 
