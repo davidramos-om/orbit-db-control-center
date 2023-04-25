@@ -1,3 +1,9 @@
+import CounterStore from "orbit-db-counterstore";
+import DocumentStore from "orbit-db-docstore";
+import EventStore from "orbit-db-eventstore";
+import FeedStore from "orbit-db-feedstore";
+import KeyValueStore from "orbit-db-kvstore";
+
 export enum DBType {
     feed = 'feed',
     eventlog = 'eventlog',
@@ -30,20 +36,28 @@ export const DbTypeExtendedDescription = [ {
 
 export enum DBPermission {
     public = 'public',
-    private = 'private'
+    private = 'private',
+    custom = 'custom'
 }
 
-export const DBPermissionExtendedDescription = [ {
-    type: DBPermission.public,
-    description: 'Anyone can read and write'
-}, {
-    type: DBPermission.private,
-    description: 'Creator-only : only you can write, anyone can read'
-} ]
+export const DBPermissionExtendedDescription = [
+    {
+        type: DBPermission.public,
+        description: 'Anyone can read and write'
+    },
+    {
+        type: DBPermission.private,
+        description: 'Creator-only : only you can write, anyone can read'
+    },
+    {
+        type: DBPermission.custom,
+        description: 'Custom : you can specify who can read and write'
+    }
+]
 
 
 //? For type safety purposes only
-export type OrbitDbInstance = any & {};
+export type DataBaseInstance<T> = KeyValueStore<T> | FeedStore<T> | EventStore<T> | DocumentStore<T> | CounterStore;
 export type OrbitDbProgram = any & {};
 
 export interface DBEntry {
