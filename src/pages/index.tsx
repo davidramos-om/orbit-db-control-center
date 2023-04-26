@@ -1,21 +1,29 @@
+import { useEffect } from "react";
 import { Box, Stack, Text } from '@chakra-ui/react';
 
+import { useSiteState, useSiteStateDispatch } from "#/context/SiteContext";
 import CreateDataBase from "#/blocks/CreateDB";
 import RegreshDataBases from "#/blocks/RefreshDBs";
 import OpenDataBase from "#/blocks/OpenDB";
 import DataBaseList, { DBRow } from "#/blocks/DbList";
-import { useAppDb } from "#/context/dbs-reducer";
-import { getOrbitDB } from '#/lib/db'
+import { useAppDb } from "#/context/DBsContext";
 
 const HomePage = () => {
 
     const { dbs } = useAppDb();
-    const dbInstance = getOrbitDB();
+    const { orbitDb } = useSiteState();
+    const siteDispatcher = useSiteStateDispatch();
+
+    useEffect(() => {
+
+        siteDispatcher({
+            type: 'setStore',
+            value: null,
+        });
+
+    }, [ siteDispatcher ]);
 
     const rows = dbs.map((db) => {
-
-        // const entry = MapOrbitDbEntry(db);
-
         const _r: DBRow = {
             id: db.id,
             multiHash: db.hash,
@@ -23,7 +31,7 @@ const HomePage = () => {
             address: db.payload.value.address,
             date: new Date(db.payload.value.added || 0),
             type: db.payload.value.type,
-            external: db.identity.id !== (dbInstance ? String((dbInstance as any).identity?.id) : '')
+            external: db.identity.id !== (orbitDb ? String((orbitDb as any).identity?.id) : '')
         }
 
         return _r;

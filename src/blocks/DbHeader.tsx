@@ -1,6 +1,6 @@
 import { Stack } from "@chakra-ui/react";
 
-import { useAppDb } from "#/context/dbs-reducer";
+import { useAppDb } from "#/context/DBsContext";
 import DbGoBack from "#/components/DbGoBack";
 import DbInformation from "./DbInformation";
 

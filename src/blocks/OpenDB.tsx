@@ -5,9 +5,12 @@ import {
 } from "@chakra-ui/react"
 
 import { connectToDb } from "#/lib/manage-dbs";
-import { useAppLogDispatch } from '#/context/logs-reducer';
-import { useSiteState } from '#/context/site-reducer';
+import { useAppLogDispatch } from '#/context/LogsContext';
+import { useAppDbDispatch } from '#/context/DBsContext';
+import { useSiteState } from '#/context/SiteContext';
 import { isValidDbAddress } from "#/lib/helper";
+import { getProgramByHash } from "#/lib/manage-programs";
+import { MapOrbitDbEntry } from "#/lib/mapper";
 
 type OpenDbProps = {
     onDbOpened: (hash: string) => void;
@@ -20,7 +23,8 @@ function OpenDbDialog({ onDbOpened }: OpenDbProps) {
     const [ dbAddress, setDbAddress ] = useControllableState({ defaultValue: '' });
     const cancelRef = useRef();
     const { orbitDbReady } = useSiteState();
-    const dispatch = useAppLogDispatch();
+    const logDispatcher = useAppLogDispatch();
+    const dbDispatcher = useAppDbDispatch();
     const [ loading, setLoading ] = useState<boolean>(false);
 
     const handleOpenDb = async () => {
@@ -50,7 +54,15 @@ function OpenDbDialog({ onDbOpened }: OpenDbProps) {
 
             setLoading(true);
             const { hash } = await connectToDb(dbAddress);
-            dispatch({
+            const program = await getProgramByHash(hash);
+            const dbEntry = MapOrbitDbEntry(program);
+
+            dbDispatcher({
+                type: "added",
+                db: dbEntry
+            });
+
+            logDispatcher({
                 type: 'add',
                 log: {
                     text: `Connected to database ${dbAddress}`,
@@ -71,7 +83,7 @@ function OpenDbDialog({ onDbOpened }: OpenDbProps) {
                 isClosable: true,
             });
 
-            dispatch({
+            logDispatcher({
                 type: 'add',
                 log: {
                     text: `Failed to connect to database ${dbAddress} : ${error?.message || 'Something went wrong'}`,

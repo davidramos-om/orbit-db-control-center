@@ -2,7 +2,7 @@ import { Accordion, AccordionItem, AccordionButton, Box, Flex, AccordionIcon, Ac
 import { useEffect, useRef } from "react";
 
 import { TreeDotsHorizontalSvgIcon } from "#/components/TreeDotsHorizontalSvgIcon";
-import { useAppLog } from "#/context/logs-reducer";
+import { useAppLog } from "#/context/LogsContext";
 import { sentenseCase } from "#/utils/helper";
 
 

@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Badge, Card, CardBody, CardHeader, HStack, Heading, Icon, IconButton, Stack, Text, Tooltip } from "@chakra-ui/react";
+import { Badge, Card, CardBody, CardHeader, Heading, Icon, IconButton, Stack, Text, Tooltip } from "@chakra-ui/react";
 import { CopyIcon, CheckIcon, } from "@chakra-ui/icons";
 
-import SvgIconify from 'src/components/SvgIconify'
+import { useSiteState } from '#/context/SiteContext';
+import SvgIconify from '#/components/SvgIconify'
 import { pinData } from "#/lib/manage-dbs";
 import { colorSchema } from './DbList'
+import { DbInformationEntryStatus } from './DbInformationEntryStatus';
 import { DbInformationGrantAccess, DbDetails } from './DbInformationGrantAccess';
 
 
@@ -18,6 +20,8 @@ export default function DbInformation({ db, showEntriesCount = true }: Props) {
     const [ copied, setCopied ] = useState<boolean>(false);
     const [ bafyCid, setBafyCid ] = useState<string>('');
     const [ loading, setLoading ] = useState<boolean>(false);
+    const { store: orbitStore } = useSiteState()
+
 
     const handleSyncPeersLocally = async () => {
 
@@ -60,34 +64,71 @@ export default function DbInformation({ db, showEntriesCount = true }: Props) {
         }, 2000);
     }
 
+    const handlePrintToConsole = () => {
+        console.log({ orbitDbStore: orbitStore });
+    }
+
     return (
         <Card variant={"elevated"}>
             <CardHeader>
-                <HStack spacing='1'>
-                    <Heading size='md'>{db?.address || '...'}</Heading>
+                <Stack
+                    spacing='1'
+                    direction={{ base: 'column', md: 'row' }}
+                    alignItems="center"
+                >
+                    <Heading
+                        wordBreak={'break-all'}
+                        size={{ base: 'sm', md: 'md' }}
+                        maxInlineSize={{ base: '100%', md: '80%' }}
+                    >{db?.address || '...'}
+                    </Heading>
                     {db?.address &&
-                        <>
-                        <Icon onClick={handleCopyToClipboard}
-                            cursor='pointer'
-                            color={copied ? 'green.500' : 'gray.500'}
-                            ml='auto'
-                            as={copied ? CheckIcon : CopyIcon}
-                        />
-                        <Tooltip
-                            label="Sync with local peers"
+                        <Stack
+                            direction='row'
+                            alignItems="center"
                         >
-                            <IconButton
-                                variant="ghost"
-                                onClick={handleSyncPeersLocally}
-                                aria-label="sync database with local peers"
-                                cursor='pointer'
-                                ml='auto'
-                                icon={<SvgIconify icon='academicons:pubpeer-square' />}
-                            />
-                        </Tooltip>
-                    </>
+                            <Tooltip label="Copy address to clipboard">
+                                <Icon onClick={handleCopyToClipboard}
+                                    cursor='pointer'
+                                    color={copied ? 'green.500' : 'gray.500'}
+                                    ml='auto'
+                                    as={copied ? CheckIcon : CopyIcon}
+                                />
+                            </Tooltip>
+                            <Tooltip
+                                label="Print to console"
+                            >
+                                <IconButton
+                                    variant="ghost"
+                                    onClick={handlePrintToConsole}
+                                    aria-label="print database to console"
+                                    cursor='pointer'
+                                    ml='auto'
+                                    icon={<SvgIconify icon='mdi:console' />}
+                                />
+                            </Tooltip>
+                            <Tooltip
+                                label="Sync with local peers"
+                            >
+                                <IconButton
+                                    variant="ghost"
+                                    onClick={handleSyncPeersLocally}
+                                    aria-label="sync database with local peers"
+                                    cursor='pointer'
+                                    ml='auto'
+                                    icon={<SvgIconify icon='academicons:pubpeer-square' />}
+                                />
+                            </Tooltip>
+                        </Stack>
                     }
-                </HStack>
+                </Stack>
+                <Stack
+                    spacing='1'
+                    direction={{ base: 'column', md: 'row' }}
+                    alignItems="flex-start"
+                >
+                    <DbInformationEntryStatus />
+                </Stack>
                 {bafyCid && <Text> {bafyCid} </Text>}
             </CardHeader>
             <CardBody>
@@ -104,8 +145,8 @@ export default function DbInformation({ db, showEntriesCount = true }: Props) {
                         </Badge>
                     </Text>
                     {showEntriesCount && (
-                    <Text py='0.5'>
-                        Entries : <b> {db?.entriesCount || '0'}</b>
+                        <Text py='0.5'>
+                            Entries : <b> {db?.entriesCount || '0'}</b>
                         </Text>
                     )}
                 </Stack>

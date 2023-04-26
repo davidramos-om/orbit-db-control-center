@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
     AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button,
     FormControl, FormLabel, Input, ModalCloseButton, Select, Stack, Divider, List, ListItem, Text, IconButton,
@@ -8,29 +8,31 @@ import { DeleteIcon } from "@chakra-ui/icons";
 
 import { DBType, DBPermission, DbTypeExtendedDescription, DBPermissionExtendedDescription } from '#/lib/types';
 import { getProgramByHash } from "#/lib/manage-programs";
-import { getOrbitDB } from "#/lib/db";
 import { createDatabase } from "#/lib/manage-dbs";
 import { MapOrbitDbEntry } from "#/lib/mapper";
-import { useAppDbDispatch } from "#/context/dbs-reducer";
-import { useAppLogDispatch } from "#/context/logs-reducer";
-import { useSiteState } from "#/context/site-reducer";
+import { useAppDbDispatch } from "#/context/DBsContext";
+import { useAppLogDispatch } from "#/context/LogsContext";
+import { useSiteState } from "#/context/SiteContext";
 
 function CreateDbDialog() {
 
     const toast = useToast();
     const dispatch = useAppDbDispatch();
     const logDispatch = useAppLogDispatch();
-    const { orbitDbReady } = useSiteState();
-    const { isOpen, onOpen, onClose } = useDisclosure();
+    const { orbitDbReady, orbitDb } = useSiteState();
+
     const cancelRef = useRef();
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const [ loading, setLoading ] = useState(false);
     const [ db, setDb ] = useControllableState({ defaultValue: '' });
     const [ dbType, setDbType ] = useControllableState<DBType | ''>({ defaultValue: '' });
     const [ permission, setPermission ] = useControllableState<DBPermission | ''>({ defaultValue: '' });
 
     const [ identity, setIdentity ] = useControllableState<string>({ defaultValue: '' });
     const [ identities, setIdentities ] = useControllableState<string[]>({ defaultValue: [] });
-    const orbitdb = getOrbitDB();
-    const dbIdentity = orbitdb ? (orbitdb as any).identity.id as string : undefined;
+
+
+    const dbIdentity = orbitDb ? (orbitDb as any).identity.id as string : undefined;
 
 
     const handleCreate = async () => {
@@ -49,6 +51,7 @@ function CreateDbDialog() {
             if (!dbIdentity)
                 throw new Error('No identity found');
 
+            setLoading(true);
             const { hash } = await createDatabase({
                 name: db,
                 type: dbType,
@@ -56,7 +59,7 @@ function CreateDbDialog() {
                 access: [ dbIdentity, ...identities ]
             });
 
-            const program = getProgramByHash(hash);
+            const program = await getProgramByHash(hash);
             const dbEntry = MapOrbitDbEntry(program);
 
             dispatch({
@@ -84,6 +87,9 @@ function CreateDbDialog() {
                     type: 'error'
                 }
             });
+        }
+        finally {
+            setLoading(false);
         }
     }
 
@@ -224,6 +230,8 @@ function CreateDbDialog() {
                                 colorScheme='pink'
                                 onClick={handleCreate}
                                 ml={3}
+                                isLoading={loading}
+                                loadingText="Creating..."
                             >
                                 Create
                             </Button>

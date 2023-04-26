@@ -1,39 +1,48 @@
 import { useState, useEffect } from 'react';
 import { chakra, useToken, useDisclosure } from "@chakra-ui/react";
-import { type IPFS } from "ipfs-core";
-import type OrbitDB from "orbit-db";
 
-import { useAppLogDispatch } from "#/context/logs-reducer";
+import { useAppLogDispatch } from "#/context/LogsContext";
+import { useSiteStateDispatch, useSiteState } from "#/context/SiteContext";
+import { useAppDbDispatch } from "#/context/DBsContext";
 import useIsMounted from "#/hooks/useIsMounted";
-import { SystemState } from "#/lib/types";
+
 import { initOrbitDB, initPrograms } from "#/lib/db";
+import { SystemState } from "#/lib/types";
+import { MapOrbitDbEntry } from "#/lib/mapper";
+import { getAllPrograms } from "#/lib/manage-programs";
 
 import { OrbitDbSystemInfo } from "./OrbitDbSystemInfo";
 import { SytemStatusIcon } from "./SytemStatusIcon";
 
-type Props = {
-    ipfs: IPFS | null;
-    onOrbitDbReady: () => void;
-}
+export function OrbitDbSystem() {
 
-export function OrbitDbSystem({ ipfs, onOrbitDbReady }: Props) {
+    const logDispatcher = useAppLogDispatch();
+    const DbDispatcher = useAppDbDispatch();
+    const siteStateDispatcher = useSiteStateDispatch();
+    const { ipfs, ipfsReady, orbitDb, orbitDbReady } = useSiteState();
 
-    const dispatch = useAppLogDispatch();
     const isMounted = useIsMounted();
-    const { isOpen, onClose, onOpen } = useDisclosure(); 
+    const { isOpen, onClose, onOpen } = useDisclosure();
     const [ dbState, setDbState ] = useState<SystemState>(SystemState.connecting);
-    const [ orbitDb, setOrbitDb ] = useState<OrbitDB | null>(null);
+
     const color = useToken('colors', dbState === SystemState.connected ? 'green.500' : dbState === SystemState.error ? 'red.500' : dbState === SystemState.disconnected ? 'black.500' : 'orange.700');
+
+    useEffect(() => {
+
+        if (!ipfs || !ipfsReady || !orbitDb || !orbitDbReady)
+            setDbState(() => SystemState.disconnected);
+
+    }, [ ipfs, ipfsReady, orbitDb, orbitDbReady ]);
 
     useEffect(() => {
 
         const init = async () => {
             try {
 
-                if (!ipfs)
+                if (!ipfs || !ipfsReady)
                     return;
 
-                dispatch({
+                logDispatcher({
                     type: 'add',
                     log: {
                         text: `Connecting to OrbitDB`,
@@ -41,42 +50,30 @@ export function OrbitDbSystem({ ipfs, onOrbitDbReady }: Props) {
                     }
                 });
 
-                const db = await initOrbitDB(ipfs);            
-                if (!isMounted())
-                    return;
+                const db = await initOrbitDB(ipfs);
+                siteStateDispatcher({ type: 'setOrbitDb', value: db });
+                logDispatcher({ type: 'add', log: { text: `Connected to OrbitDB Id : ${db.id}`, type: 'connected' } });
+
 
                 await initPrograms();
-                if (!isMounted())
-                    return;
+                const programs = await getAllPrograms();
+                const dbs = programs?.map((db: any) => { return MapOrbitDbEntry(db) }) || [];
+                DbDispatcher({ type: 'init', dbs });
 
-                if (db?.id) {
+                if (isMounted())
                     setDbState(() => SystemState.connected);
-                    setOrbitDb(() => db);
-                    onOrbitDbReady();
 
-                    dispatch({
-                        type: 'add',
-                        log: {
-                            text: `Connected to OrbitDB Id : ${db.id}`,
-                            type: 'connected'
-                        }
-                    });
-
-                    dispatch({
-                        type: 'add',
-                        log: {
-                            text: `OrbitDB Instance | identity:  ${(db as any).identity._id} | directory: ${(db as any).directory}`,
-                            type: 'connected'
-                        }
-                    });
-                }
-                else
-                    setDbState(() => SystemState.disconnected);
+                logDispatcher({
+                    type: 'add',
+                    log: {
+                        text: `OrbitDB Instance | identity:  ${(db as any).identity._id} | directory: ${(db as any).directory}`,
+                        type: 'connected'
+                    }
+                });
             }
             catch (error: any) {
-
                 setDbState(() => SystemState.error);
-                dispatch({
+                logDispatcher({
                     type: 'add',
                     log: {
                         text: `Error connecting to OrbitDB : ${error.message}`,
@@ -88,7 +85,7 @@ export function OrbitDbSystem({ ipfs, onOrbitDbReady }: Props) {
 
         setTimeout(() => { init(); }, 1500);
 
-    }, [ ipfs, dispatch, isMounted, onOrbitDbReady ]);
+    }, [ ipfs, ipfsReady, logDispatcher, siteStateDispatcher, DbDispatcher, isMounted, ]);
 
 
     const handleOpen = () => {
