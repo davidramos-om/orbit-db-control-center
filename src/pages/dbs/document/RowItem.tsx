@@ -3,7 +3,8 @@ import { Td, HStack } from "@chakra-ui/react";
 
 import ShowEntryPayload from '#/blocks/ShowPayload';
 import DeleteEntry from '#/blocks/DeleteEntryButton';
-import { useAppLogDispatch } from '#/context/logs-reducer';
+import { useAppLogDispatch } from '#/context/LogsContext';
+import { useSiteState } from "#/context/SiteContext";
 import { removeEntry } from "#/lib/manage-entries";
 import { DocStoreModel } from "./DocumentsLog";
 
@@ -17,16 +18,20 @@ export function RowItem({ index, dbAddress, log }: RowItemProps) {
 
     const [ deleted, setDeleted ] = useState(false);
     const dispatch = useAppLogDispatch();
+    const { store } = useSiteState();
 
     const handleDelete = useCallback(async () => {
         try {
 
-            await removeEntry(dbAddress, log.id);
+            if (!store)
+                return;
+
+            await removeEntry(store, log.id);
             dispatch({
                 type: 'add',
                 log: {
                     type: 'deleted',
-                    text: `Entry ${log.id} deleted from ${dbAddress}`
+                    text: `Entry ${log.id} deleted from ${store.address.path}`
                 }
             });
 
@@ -37,11 +42,11 @@ export function RowItem({ index, dbAddress, log }: RowItemProps) {
                 type: 'add',
                 log: {
                     type: 'error',
-                    text: `Error deleting entry ${log.id} from ${dbAddress}: ${error.message}`
+                    text: `Error deleting entry ${log.id} from ${store?.address?.path || ''}: ${error.message}`
                 }
             });
         }
-    }, [ dbAddress, dispatch, log.id ]);
+    }, [ store, dispatch, log.id ]);
 
     const sxStyle = {
         textDecoration: deleted ? 'line-through' : 'none',
