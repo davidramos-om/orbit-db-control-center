@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Button, useToast, Stack, Checkbox, InputGroup, InputRightElement, Spacer, Textarea } from "@chakra-ui/react";
 
 import EditJsonDocument from "#/blocks/EditJsonDocument";
-import { useAppLogDispatch } from "#/context/logs-reducer";
+import { useAppLogDispatch } from "#/context/LogsContext";
+import { useSiteState } from "#/context/SiteContext";
 import { addEntry } from "#/lib/manage-entries";
 import { isValidJson } from "#/utils/helper";
 
@@ -21,6 +22,7 @@ export default function DocStoreController({ dbAddress, dbName, onRefresh, onEnt
     const [ strictMode, setStrictMode ] = useState(true);
     const [ disableInput, setDisableInput ] = useState(false);
     const [ pinData, setPinData ] = useState(false);
+    const { store } = useSiteState();
     const toast = useToast();
 
     const dispatch = useAppLogDispatch();
@@ -29,7 +31,7 @@ export default function DocStoreController({ dbAddress, dbName, onRefresh, onEnt
 
         try {
 
-            if (!dbAddress)
+            if (!store)
                 return;
 
             if (!id || !value) {
@@ -80,7 +82,7 @@ export default function DocStoreController({ dbAddress, dbName, onRefresh, onEnt
                 timestamp: Date.now()
             }
 
-            const hash = await addEntry(dbAddress, { pin: pinData, entry: input });
+            const hash = await addEntry(store, { pin: pinData, entry: input });
             onEntryAdded(id);
             dispatch({
                 type: 'add',

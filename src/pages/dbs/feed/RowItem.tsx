@@ -3,7 +3,8 @@ import { Td, HStack } from "@chakra-ui/react";
 
 import ShowEntryPayload from '#/blocks/ShowPayload';
 import DeleteEntry from '#/blocks/DeleteEntryButton';
-import { useAppLogDispatch } from '#/context/logs-reducer';
+import { useAppLogDispatch } from '#/context/LogsContext';
+import { useSiteState } from "#/context/SiteContext";
 import { removeEntry } from "#/lib/manage-entries";
 import { FeedStoreModel } from "./FeedLog";
 
@@ -17,11 +18,15 @@ export function RowItem({ index, dbAddress, log }: RowItemProps) {
 
     const [ deleted, setDeleted ] = useState(false);
     const dispatch = useAppLogDispatch();
+    const { store } = useSiteState();
 
     const handleDelete = useCallback(async () => {
         try {
 
-            await removeEntry(dbAddress, log.hash);
+            if (!store)
+                return;
+
+            await removeEntry(store, log.hash);
             dispatch({
                 type: 'add',
                 log: {
@@ -41,7 +46,7 @@ export function RowItem({ index, dbAddress, log }: RowItemProps) {
                 }
             });
         }
-    }, [ dbAddress, dispatch, log.hash ]);
+    }, [ store, dbAddress, dispatch, log.hash ]);
 
     const sxStyle = {
         textDecoration: deleted ? 'line-through' : 'none',

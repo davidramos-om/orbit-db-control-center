@@ -5,8 +5,9 @@ import { ChakraProvider } from '@chakra-ui/react';
 
 import './index.css'
 import App from './App'
-import { AppLogProvider } from "src/context/logs-reducer";
-import { AppDbProvider } from "src/context/dbs-reducer";
+import { AppLogProvider } from "src/context/LogsContext";
+import { AppDbProvider } from "src/context/DBsContext";
+import { AppSiteStateProvider } from "src/context/SiteContext";
 import theme from 'src/theme';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
@@ -14,9 +15,11 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <ChakraProvider theme={theme}>
       <AppLogProvider>
         <AppDbProvider>
-          <Router>
-            <App />
-          </Router>
+          <AppSiteStateProvider>
+            <Router>
+              <App />
+            </Router>
+          </AppSiteStateProvider>
         </AppDbProvider>
       </AppLogProvider>
     </ChakraProvider>

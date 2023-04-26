@@ -7,7 +7,7 @@ import {
 
 import { DBType } from "#/lib/types";
 import { grantAccess } from "#/lib/manage-dbs";
-import { useAppLogDispatch } from "#/context/logs-reducer";
+import { useAppLogDispatch } from "#/context/LogsContext";
 
 export type DbDetails = {
     address: string;

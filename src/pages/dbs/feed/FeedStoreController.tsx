@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Button, useToast, Stack, Checkbox, InputGroup, InputRightElement, Spacer, Textarea } from "@chakra-ui/react";
 
 import EditJsonDocument from "#/blocks/EditJsonDocument";
-import { useAppLogDispatch } from "#/context/logs-reducer";
+import { useAppLogDispatch } from "#/context/LogsContext";
+import { useSiteState } from "#/context/SiteContext";
 import { isValidJson } from "#/utils/helper";
 import { addEntry } from "#/lib/manage-entries";
 
@@ -13,12 +14,13 @@ type Props = {
     onEntryAdded: (key: string) => void;
 }
 
-export default function FeedStoreController({ dbAddress, dbName, onRefresh, onEntryAdded }: Props) {
+export default function FeedStoreController({ dbName, onRefresh, onEntryAdded }: Props) {
 
     const [ value, setValue ] = useState('');
     const [ strictMode, setStrictMode ] = useState(true);
     const [ pinData, setPinData ] = useState(false);
-    const [ disableInput, setDisableInput ] = useState(false);    
+    const [ disableInput, setDisableInput ] = useState(false);
+    const { store } = useSiteState();
     const toast = useToast();
 
     const dispatch = useAppLogDispatch();
@@ -27,7 +29,7 @@ export default function FeedStoreController({ dbAddress, dbName, onRefresh, onEn
 
         try {
 
-            if (!dbAddress)
+            if (!store)
                 return;
 
             if (!value) {
@@ -61,7 +63,7 @@ export default function FeedStoreController({ dbAddress, dbName, onRefresh, onEn
                 timestamp: Date.now()
             }
 
-            const hash = await addEntry(dbAddress, { pin: pinData, entry: input });
+            const hash = await addEntry(store, { pin: pinData, entry: input });
 
             onEntryAdded(hash);
             dispatch({

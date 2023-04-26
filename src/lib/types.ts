@@ -8,7 +8,7 @@ export enum DBType {
     feed = 'feed',
     eventlog = 'eventlog',
     keyvalue = 'keyvalue',
-    docstore = 'docs',
+    docstore = 'docstore',
     counter = 'counter'
 };
 
@@ -58,7 +58,7 @@ export const DBPermissionExtendedDescription = [
 
 //? For type safety purposes only
 export type DataBaseInstance<T> = KeyValueStore<T> | FeedStore<T> | EventStore<T> | DocumentStore<T> | CounterStore;
-export type OrbitDbProgram = any & {};
+export type OrbitDbProgram<T> = FeedStore<T>;
 
 export interface DBEntry {
     id: string;

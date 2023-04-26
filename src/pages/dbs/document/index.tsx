@@ -2,9 +2,12 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardHeader, CardBody, Heading, Stack, Progress } from "@chakra-ui/react";
 
-import { useAppDb } from "#/context/dbs-reducer";
+import { useAppDb } from "#/context/DBsContext";
+import { DatabasePageProvider } from "#/context/PageContexts";
+import { useSiteStateDispatch, useSiteState } from "#/context/SiteContext";
 import useIsMounted from "#/hooks/useIsMounted";
 import { fetchEntries } from "#/lib/manage-entries";
+import { getOneDatabase } from "#/lib/manage-dbs";
 
 import DbHeaderCard from "#/blocks/DbHeader";
 import DocumentStoreControl from './DocumentStoreController';
@@ -14,6 +17,8 @@ export default function DocumentDbPage() {
 
     const { id } = useParams();
     const { findDb } = useAppDb();
+    const siteDispatcher = useSiteStateDispatch();
+    const { store } = useSiteState();
     const [ entries, setEntries ] = useState<DocStoreModel[]>([]);
     const [ loading, setLoading ] = useState<boolean>(false);
     const isMounted = useIsMounted();
@@ -21,16 +26,42 @@ export default function DocumentDbPage() {
     const dbEntry = useMemo(() => findDb(id || ''), [ id, findDb ]);
     const dbAddress = useMemo(() => dbEntry?.payload.value.address, [ dbEntry ]);
 
+    useEffect(() => {
+
+        if (!dbAddress)
+            return;
+
+        const fetDbStore = async () => {
+
+            const _store = await getOneDatabase({ address: dbAddress, load: false });
+            if (!_store)
+                return;
+
+            siteDispatcher({ type: 'setStore', value: _store });
+        }
+
+        fetDbStore();
+
+    }, [ dbAddress, siteDispatcher ]);
+
+    useEffect(() => {
+
+        return () => {
+            siteDispatcher({ type: 'setStore', value: null });
+        }
+    }, [ siteDispatcher ]);
+
+
     const fetchData = useCallback(async (restar: boolean, showLoader: boolean) => {
         try {
 
-            if (!dbAddress)
+            if (!store)
                 return;
 
             if (showLoader)
                 setLoading(true);
 
-            const _entries = await fetchEntries(dbAddress, {
+            const _entries = await fetchEntries(store, {
                 docsOptions: { fullOp: true },
                 query: { reverse: true, limit: -1 }
             });
@@ -81,7 +112,7 @@ export default function DocumentDbPage() {
         finally {
             setLoading(false);
         }
-    }, [ dbAddress, isMounted ]);
+    }, [ store, isMounted ]);
 
     useEffect(() => {
         fetchData(false, true);
@@ -102,33 +133,35 @@ export default function DocumentDbPage() {
     }, [ fetchData ]);
 
     return (
-        <Stack spacing={4}>
-            <DbHeaderCard
-                multiHash={id || ''}
-                entriesCount={entries.length}
-                showEntriesCount={true}
-            />
-            <Card>
-                <CardHeader>
-                    <Heading fontSize={"sm"} mb={2}>
-                        Add a document to the database
-                    </Heading>
-                    <DocumentStoreControl
-                        onEntryAdded={handleEntryAdded}
-                        onRefresh={handleRefresh}
-                        dbAddress={dbAddress || ''}
-                        dbName={dbEntry?.payload.value.name || ''}
-                    />
-                    <br />
-                </CardHeader>
-                <CardBody>
-                    x{loading && <Progress size='xs' isIndeterminate />}
-                    <DocumentLogs
-                        dbAddress={dbAddress || ''}
-                        entries={entries || []}
-                    />
-                </CardBody>
-            </Card>
-        </Stack >
+        <DatabasePageProvider onReplicated={handleRefresh}>
+            <Stack spacing={4}>
+                <DbHeaderCard
+                    multiHash={id || ''}
+                    entriesCount={entries.length}
+                    showEntriesCount={true}
+                />
+                <Card>
+                    <CardHeader>
+                        <Heading fontSize={"sm"} mb={2}>
+                            Add a document to the database
+                        </Heading>
+                        <DocumentStoreControl
+                            onEntryAdded={handleEntryAdded}
+                            onRefresh={handleRefresh}
+                            dbAddress={dbAddress || ''}
+                            dbName={dbEntry?.payload.value.name || ''}
+                        />
+                        <br />
+                    </CardHeader>
+                    <CardBody>
+                        x{loading && <Progress size='xs' isIndeterminate />}
+                        <DocumentLogs
+                            dbAddress={dbAddress || ''}
+                            entries={entries || []}
+                        />
+                    </CardBody>
+                </Card>
+            </Stack >
+        </DatabasePageProvider>
     );
 }

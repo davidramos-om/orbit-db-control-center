@@ -95,7 +95,7 @@ export function IFPSSystemInfo({ open, ipfs, onClose }: Props) {
                                 variant="ghost"
                                 colorScheme="blue"
                                 onClick={() => {
-                                    console.info('IFPSSystemInfo.ipfs', ipfs);
+                                    console.info({ IPFSNodeInstance: ipfs });
                                 }}
                             >
                                 Print to console

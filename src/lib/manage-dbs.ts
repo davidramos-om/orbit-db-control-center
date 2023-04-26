@@ -10,7 +10,26 @@ import { addRemotePins } from "./manage-ipfs";
 
 //** DATABASE MANAGER **//
 
-export const getOneDatabase = async ({ address, load }: { address: string; load: boolean }): Promise<Store | null> => {
+//creat a hash of the database address that as been opened
+const OpenedDBs: { [ key: string ]: Store } = {};
+
+export function clearOpenedDBs() {
+
+    for (const key in OpenedDBs) {
+        const db = OpenedDBs[ key ];
+        db.close();
+    }
+
+    Object.keys(OpenedDBs).forEach(key => delete OpenedDBs[ key ]);
+}
+
+export const getOneDatabase = async ({ address, load = false, onReplicate, onReady, onWrite }: {
+    address: string;
+    load: boolean,
+    onReplicate?: () => void;
+    onReady?: () => void;
+    onWrite?: (address: any, entry: any, heads: any) => void;
+}): Promise<Store | null> => {
 
     if (!address)
         return null;
@@ -19,14 +38,32 @@ export const getOneDatabase = async ({ address, load }: { address: string; load:
     if (!orbitdb)
         throw new Error('OrbitDB not initialized');
 
-    let db: any = null;
+    console.log('getOneDatabase', { OpenedDBs });
+    if (OpenedDBs[ address ])
+        return OpenedDBs[ address ];
+
+    let db: Store | null = null;
     if (orbitdb) {
         db = await orbitdb.open(address, {
             localOnly: false, //* load from local storage
             create: false, //* create if doesn't exist
-            overwrite: true, //* overwrite if exists
+            overwrite: false, //* overwrite if exists
             replicate: true, //* replicate across peers            
         });
+
+        if (db) {
+
+            OpenedDBs[ address ] = db;
+
+            if (onReplicate)
+                db.events.on('replicated', onReplicate);
+
+            if (onReady)
+                db.events.on('ready', onReady);
+
+            if (onWrite)
+                db.events.on('write', onWrite);
+        }
 
         if (db && load)
             await db.load();
@@ -46,7 +83,14 @@ export const connectToDb = async (address: string): Promise<{ db: Store; hash: s
     if (!program)
         return Promise.reject('Programs database not initialized');
 
-    const db = await orbitdb.open(address);
+    const db = await getOneDatabase({
+        address,
+        load: false,
+    });
+
+    if (!db)
+        return Promise.reject('Database not found');
+
     const hash = await program.add({
         name: (db as any).dbname,
         type: db.type,
@@ -62,7 +106,7 @@ export const connectToDb = async (address: string): Promise<{ db: Store; hash: s
 
 export const createDatabase = async (
     {
-        name, type, permissions, access
+        name: dbName, type, permissions, access
     }: {
         name: string;
         type: DBType;
@@ -109,7 +153,7 @@ export const createDatabase = async (
                 write = [ ...access, myId ];
 
             accessController = {
-                // type: 'orbitdb',
+                type: 'orbitdb',
                 write: write
             };
             break;
@@ -126,7 +170,6 @@ export const createDatabase = async (
     };
 
     let db: DataBaseInstance<unknown> | null = null;
-    let dbName = name;// + '.' + ((orbitdb as any).identity.id);
     switch (type) {
         case DBType.keyvalue:
             db = await orbitdb.keyvalue(dbName, options);

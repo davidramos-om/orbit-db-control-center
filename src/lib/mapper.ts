@@ -1,7 +1,7 @@
 
 import { DBEntry, OrbitDbProgram } from './types';
 
-export function MapOrbitDbEntry(db: any | OrbitDbProgram): DBEntry {
+export function MapOrbitDbEntry(db: any | OrbitDbProgram<unknown>): DBEntry {
 
 
     return {

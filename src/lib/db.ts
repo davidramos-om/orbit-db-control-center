@@ -4,13 +4,13 @@ import ipfsConfig from './ipfs-config'
 import { OrbitDbProgram } from "./types";
 
 let orbitdb: OrbitDB | null = null; //* OrbitDB instance
-let program: OrbitDbProgram | null = null; //* Programs database
+let program: OrbitDbProgram<unknown> | null = null; //* Programs database
 
 //* Pinning node
 let ipfs_pinningNode: IPFS | null = null;
 let starting_ipfs = false;
 
-export function setProgream(_program: any) {
+export function setProgream(_program: OrbitDbProgram<unknown> | null) {
   program = _program;
 }
 
@@ -21,6 +21,10 @@ export function getProgram() {
 export async function loadProgram() {
   if (program)
     await program.load();
+}
+
+export function setOrbitDB(_orbitdb: OrbitDB | null) {
+  orbitdb = _orbitdb;
 }
 
 export function getOrbitDB(): OrbitDB | null {
@@ -58,7 +62,6 @@ export const initIPFS = async () => {
 
     starting_ipfs = false;
 
-
     return ipfs_pinningNode
   }
   catch (error) {
@@ -75,17 +78,18 @@ export const initOrbitDB = async (ipfs: IPFS) => {
   if (orbitdb)
     return orbitdb;
 
-  orbitdb = await OrbitDB.createInstance(ipfs, {
+  const _orbitdb = await OrbitDB.createInstance(ipfs, {
     directory: './orbitdb',
   });
 
+  setOrbitDB(_orbitdb);
   return orbitdb;
 }
 
 export const initPrograms = async () => {
 
   if (program)
-    return program as OrbitDbProgram;
+    return program;
 
   const orbitdb = getOrbitDB();
   if (!orbitdb)
@@ -101,41 +105,9 @@ export const initPrograms = async () => {
 
   await program.load();
 
-  return program as OrbitDbProgram;
+  return program;
 }
 
-
-export function initDbSystem(): Promise<{ ipfs: IPFS, orbitdb: OrbitDB }> {
-
-  return new Promise(async (resolve, reject) => {
-
-    try {
-
-      const ifps = await initIPFS();
-
-      if (ifps) {
-        const db = await initOrbitDB(ifps);
-        if (!db)
-          reject('OrbitDB not initialized');
-
-        const progs = await initPrograms();
-        if (!progs)
-          reject('Programs database not initialized');
-
-        resolve({
-          ipfs: ifps,
-          orbitdb: db
-        });
-      }
-      else {
-        reject('IPFS not initialized');
-      }
-    }
-    catch (e) {
-      reject(e);
-    }
-  });
-}
 
 /**
  Close databases, connections, pubsub and reset orbitdb state.

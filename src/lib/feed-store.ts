@@ -8,12 +8,12 @@ import { pinDataRemotely } from './manage-dbs';
 //* More info on the FeedStore API: https://github.com/orbitdb/orbit-db/blob/main/API.md#orbitdbfeednameaddress
 
 interface AddFeedEntryArgs {
-    feedstore: FeedStore<any>;
+    store: FeedStore<any>;
     entry: any;
     pin: boolean;
 }
 
-export async function addEntry({ feedstore, entry, pin }: AddFeedEntryArgs) {
+export async function addEntry({ store: feedstore, entry, pin }: AddFeedEntryArgs) {
 
     validateParams({ feedstore, entry });
 

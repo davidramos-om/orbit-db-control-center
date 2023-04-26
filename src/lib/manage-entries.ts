@@ -1,3 +1,4 @@
+import Store from "orbit-db-store";
 import FeedStore from "orbit-db-feedstore";
 import EventStore from "orbit-db-eventstore";
 import KeyValueStore from "orbit-db-kvstore";
@@ -6,7 +7,6 @@ import CounterStore from "orbit-db-counterstore";
 
 import { AddEntry as AddDocStoreEntry, queryEntries as fetchDocEntries, deleteEntry as delDocumentEntry } from "./docs-store";
 import { addEntry as AddFeedStoreEntry, iterator as queryFeedEntries, deleteEntry as deleteFeedEntry } from "./feed-store";
-import { getOneDatabase } from "./manage-dbs";
 
 //* params *//
 export type addEntryOptions = {
@@ -34,11 +34,9 @@ export type fetchDbOptions = {
 
 //** ENTRY MANAGER **//
 
-export const fetchEntry = async (address: string, likeMultiHashOrKey: string) => {
+export const fetchEntry = async (db: Store, likeMultiHashOrKey: string) => {
 
-    const db = await getOneDatabase({ address, load: true });
-    if (!db)
-        throw new Error('Database not found');
+    await db.load();
 
     if (db instanceof FeedStore)
         return db.get(likeMultiHashOrKey);
@@ -54,25 +52,9 @@ export const fetchEntry = async (address: string, likeMultiHashOrKey: string) =>
 
     if (db instanceof CounterStore)
         return db.value || 0;
-
-
-    // switch (db.type) {
-    //     case 'feed':
-    //         return await db.get(likeMultiHashOrKey);
-    //     case 'eventlog':
-    //         return await db.get(likeMultiHashOrKey);
-    //     case 'docstore':
-    //         return await db.get(likeMultiHashOrKey);
-    //     case 'keyvalue':
-    //         return await db.get(likeMultiHashOrKey);
-    //     case 'counter':
-    //         return db.value || 0;
-    //     default:
-    //         return null;
-    // }
 };
 
-export const fetchEntries = async (address: string, options: fetchDbOptions = {
+export const fetchEntries = async (db: Store, options: fetchDbOptions = {
     docsOptions: {
         fullOp: false
     },
@@ -88,10 +70,7 @@ export const fetchEntries = async (address: string, options: fetchDbOptions = {
 
     const { docsOptions, query } = options;
     const { fullOp = false } = docsOptions || {};
-
-    const db = await getOneDatabase({ address, load: true });
-    if (!db)
-        throw new Error('Database not found');
+    await db.load();
 
     if (db instanceof FeedStore)
         return queryFeedEntries({
@@ -121,40 +100,9 @@ export const fetchEntries = async (address: string, options: fetchDbOptions = {
         return db.value || 0;
 
     throw new Error('Invalid database type');
-
-    // switch (db.type) {
-    //     case 'feed':
-    //         return queryFeedEntries({
-    //             feedstore: db,
-    //             fullOp: fullOp,
-    //             query: query || { limit: 1 }
-    //         });
-    //     case 'eventlog':
-    //         const _entries = await db.iterator(query).collect();
-    //         return _entries;
-    //     case 'docstore':
-    //         return fetchDocEntries({
-    //             docstore: db,
-    //             mapper: (e: any) => e !== null,
-    //             options: {
-    //                 fullOp: fullOp
-    //             }
-    //         });
-    //     case 'keyvalue':
-    //         const all = await db.all;
-    //         return Object.keys(all).map(e => ({ payload: { key: e, value: db.get(e) } }));
-    //     case 'counter':
-    //         return db.value || 0;
-    //     default:
-    //         return null;
-    // }
 };
 
-export const addEntry = async (address: string, options: addEntryOptions) => {
-
-    const db = await getOneDatabase({ address, load: false });
-    if (!db)
-        throw new Error('Database not found');
+export const addEntry = async (db: Store, options: addEntryOptions) => {
 
     const { pin, entry } = options || {};
     const key = Object.keys(entry)[ 0 ];
@@ -162,7 +110,7 @@ export const addEntry = async (address: string, options: addEntryOptions) => {
 
     if (db instanceof FeedStore)
         return AddFeedStoreEntry({
-            feedstore: db,
+            store: db,
             entry,
             pin,
         });
@@ -183,7 +131,7 @@ export const addEntry = async (address: string, options: addEntryOptions) => {
 
     if (db instanceof DocumentStore) {
         return AddDocStoreEntry({
-            docstore: db,
+            store: db,
             entry,
             pin,
         });
@@ -195,20 +143,19 @@ export const addEntry = async (address: string, options: addEntryOptions) => {
     throw new Error('Database type not supported');
 };
 
-export const removeEntry = async (address: string, likeMultiHashOrKey: string) => {
+export const removeEntry = async (db: Store, likeMultiHashOrKey: string) => {
 
-    const db = await getOneDatabase({ address, load: false });
-    if (!db)
-        throw new Error('Database not found');
+    if (db instanceof EventStore)
+        throw new Error('Eventlog database does not support delete operation');
+
+    if (db instanceof CounterStore)
+        throw new Error('Counter database does not support delete operation');
 
     if (db instanceof FeedStore)
         return deleteFeedEntry({
             feedstore: db,
             hash: likeMultiHashOrKey
         });
-
-    if (db instanceof EventStore)
-        throw new Error('Eventlog database does not support delete operation');
 
     if (db instanceof DocumentStore)
         return delDocumentEntry({
@@ -218,9 +165,6 @@ export const removeEntry = async (address: string, likeMultiHashOrKey: string) =
 
     if (db instanceof KeyValueStore)
         return db.del(likeMultiHashOrKey, { pin: true });
-
-    if (db instanceof CounterStore)
-        throw new Error('Counter database does not support delete operation');
 
     throw new Error('Database type not supported');
 };

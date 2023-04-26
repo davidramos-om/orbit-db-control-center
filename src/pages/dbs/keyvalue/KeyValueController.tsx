@@ -2,8 +2,9 @@ import { useMemo, useState } from "react";
 import { useParams } from 'react-router-dom';
 import { Button, Input, Stack, Checkbox, useToast } from "@chakra-ui/react";
 
-import { useAppDb } from "#/context/dbs-reducer";
-import { useAppLogDispatch } from "#/context/logs-reducer";
+import { useAppDb } from "#/context/DBsContext";
+import { useAppLogDispatch } from "#/context/LogsContext";
+import { useSiteState } from "#/context/SiteContext";
 import { addEntry } from "#/lib/manage-entries";
 
 type Props = {
@@ -16,6 +17,7 @@ export default function KeyValueStoreController({ onRefresh, onAddEvent }: Props
     const [ value, setValue ] = useState('');
     const [ key, setKey ] = useState('');
     const [ pinData, setPinData ] = useState(false);
+    const { store } = useSiteState();
     const toast = useToast()
 
     const { id } = useParams();
@@ -27,13 +29,7 @@ export default function KeyValueStoreController({ onRefresh, onAddEvent }: Props
 
         try {
 
-            if (!value)
-                return;
-
-            if (!key)
-                return;
-
-            if (!dbEntry)
+            if (!value || !key || !dbEntry || !store)
                 return;
 
             //* This is the data we want to add to the db, it up to you to shape it, here is an example:
@@ -44,7 +40,7 @@ export default function KeyValueStoreController({ onRefresh, onAddEvent }: Props
                 timestamp: Date.now()
             }
 
-            const hash = await addEntry(dbEntry?.payload.value.address, { pin: pinData, entry: input });
+            const hash = await addEntry(store, { pin: pinData, entry: input });
 
             onAddEvent(key);
             dispatch({
