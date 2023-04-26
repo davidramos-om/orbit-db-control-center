@@ -51,6 +51,9 @@ export function OrbitDbSystem() {
                 });
 
                 const db = await initOrbitDB(ipfs);
+                if (!db)
+                    throw Error('Could not connect to OrbitDB');
+
                 siteStateDispatcher({ type: 'setOrbitDb', value: db });
                 logDispatcher({ type: 'add', log: { text: `Connected to OrbitDB Id : ${db.id}`, type: 'connected' } });
 
