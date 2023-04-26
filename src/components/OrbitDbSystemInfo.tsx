@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { List, ListItem, Button, AlertDialog, AlertDialogOverlay, AlertDialogCloseButton, AlertDialogHeader, AlertDialogContent, AlertDialogBody } from "@chakra-ui/react";
+import { List, ListItem, Button, AlertDialog, AlertDialogOverlay, AlertDialogCloseButton, AlertDialogHeader, AlertDialogContent, AlertDialogBody, useToast } from "@chakra-ui/react";
 import type OrbitDB from "orbit-db";
+
+import { useAppLogDispatch } from "#/context/LogsContext";
+import { useSiteStateDispatch } from "#/context/SiteContext";
+import { confirmAlert } from "#/utils/SweetAlert2";
+import { setOrbitDB, setProgream } from "#/lib/db";
+import { clearOpenedDBs } from "#/lib/manage-dbs";
 
 type Props = {
     open: boolean;
@@ -11,6 +17,12 @@ type Props = {
 export function OrbitDbSystemInfo({ open, orbitDb, onClose }: Props) {
 
     const cancelRef = useRef();
+    const [ stopping, setStopping ] = useState<boolean>(false);
+    const toast = useToast();
+    const logDispatcher = useAppLogDispatch();
+    const siteStateDispatcher = useSiteStateDispatch();
+
+
     const [ info, setInfo ] = useState<{
         id: string;
         key: string;
@@ -40,15 +52,71 @@ export function OrbitDbSystemInfo({ open, orbitDb, onClose }: Props) {
                 publicKey: dbAny.identity.publicKey || '',
                 directory: dbAny.directory || '',
             });
-
         }
 
         getInfo();
 
     }, [ orbitDb ]);
 
-    if (!orbitDb)
-        return null;
+    const handleStopOrbitDb = async () => {
+
+
+        try {
+            if (!orbitDb)
+                return;
+
+            const prompt = await confirmAlert({
+                title: 'Stop OrbitDB',
+                text: 'Are you sure you want to stop this OrbitDB instance?',
+                cancelLabel: 'Cancel',
+                confirmLabel: 'Stop',
+            });
+
+            if (!prompt.isConfirmed)
+                return;
+
+            logDispatcher({
+                type: 'add',
+                log: {
+                    text: 'Stopping OrbitDb Service',
+                    type: 'updated'
+                }
+            });
+
+            await orbitDb.disconnect();
+            setOrbitDB(null)
+            setProgream(null);
+            clearOpenedDBs();
+
+            siteStateDispatcher({
+                type: 'setOrbitDb',
+                value: null
+            });
+        }
+        catch (error) {
+
+            toast.closeAll();
+            toast({
+                position: 'top',
+                description: 'Could not stop, check the output for more details',
+                status: 'error',
+                isClosable: true,
+            });
+
+            if (error instanceof Error) {
+                logDispatcher({
+                    type: 'add',
+                    log: {
+                        text: `Could not stop service : ${error.message}`,
+                        type: 'updated'
+                    }
+                });
+            }
+        }
+        finally {
+            setStopping(false);
+        }
+    }
 
     return (
         <AlertDialog
@@ -92,6 +160,19 @@ export function OrbitDbSystemInfo({ open, orbitDb, onClose }: Props) {
                                 }}
                             >
                                 Print to console
+                            </Button>
+                        </ListItem>
+                        <ListItem>
+                            <Button
+                                width="100%"
+                                variant="ghost"
+                                colorScheme="red"
+                                onClick={handleStopOrbitDb}
+                                disabled={!orbitDb}
+                                isLoading={stopping}
+                                loadingText="Stopping..."
+                            >
+                                Stop OrbitDB Service
                             </Button>
                         </ListItem>
                     </List>

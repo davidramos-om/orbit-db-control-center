@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useToken, chakra, useDisclosure } from "@chakra-ui/react";
-import { type IPFS, } from "ipfs-core";
 
-import { useAppLogDispatch } from "#/context/logs-reducer";
+import { useAppLogDispatch } from "#/context/LogsContext";
+import { useSiteStateDispatch, useSiteState } from "#/context/SiteContext";
 import useIsMounted from "#/hooks/useIsMounted";
 import { SystemState } from "#/lib/types";
 import { initIPFS } from "#/lib/db";
@@ -10,18 +10,15 @@ import { initIPFS } from "#/lib/db";
 import { IFPSSystemInfo } from "./IFPSSystemInfo";
 import { SytemStatusIcon } from "./SytemStatusIcon";
 
-type Props = {
-    onIpfsReady: (ipfs: IPFS) => void;
-}
-
-export function IFPSSystem({ onIpfsReady }: Props) {
+export function IFPSSystem() {
 
     const dispatch = useAppLogDispatch();
+    const siteStateDispatch = useSiteStateDispatch();
+    const { ipfs } = useSiteState()
     const isMounted = useIsMounted();
 
-    const { isOpen, onClose, onOpen } = useDisclosure(); 
+    const { isOpen, onClose, onOpen } = useDisclosure();
     const [ dbState, setDbState ] = useState<SystemState>(SystemState.connecting);
-    const [ ipfs, setIpfs ] = useState<IPFS | null>(null);
 
     const color = useToken('colors', dbState === SystemState.connected ? 'green.500' : dbState === SystemState.error ? 'red.500' : dbState === SystemState.disconnected ? 'black.500' : 'orange.500');
 
@@ -39,41 +36,33 @@ export function IFPSSystem({ onIpfsReady }: Props) {
                 });
 
                 const ipfs = await initIPFS();
-                if (!isMounted())
+                if (!ipfs)
                     return;
 
-                if (ipfs) {
+                siteStateDispatch({ type: 'setIpfs', value: ipfs });
+                dispatch({
+                    type: 'add',
+                    log: {
+                        text: `Connected to IPFS`,
+                        type: 'connected'
+                    }
+                });
 
+                if (!isMounted())
                     setDbState(() => SystemState.connected);
-                    setIpfs(() => ipfs);
-                    if (!isMounted())
-                        return;
 
-                    onIpfsReady(ipfs);                    
-                    dispatch({
-                        type: 'add',
-                        log: {
-                            text: `Connected to IPFS`,
-                            type: 'connected'
-                        }
-                    });
+                const repo = await ipfs.repo.stat();
+                const id = await ipfs.id();
 
-                    const repo = await ipfs.repo.stat();
-                    const id = await ipfs.id();
-
-                    dispatch({
-                        type: 'add',
-                        log: {
-                            text: `IPFS node | pubkey:${id.publicKey} | agent:${id.agentVersion} | protocol: ${id.protocolVersion} | repo:${repo.repoPath}`,
-                            type: 'connected'
-                        }
-                    });
-                }
-                else
-                    setDbState(() => SystemState.disconnected);
+                dispatch({
+                    type: 'add',
+                    log: {
+                        text: `IPFS node | pubkey:${id.publicKey} | agent:${id.agentVersion} | protocol: ${id.protocolVersion} | repo:${repo.repoPath}`,
+                        type: 'connected'
+                    }
+                });
             }
             catch (error: any) {
-
                 setDbState(() => SystemState.error);
                 dispatch({
                     type: 'add',
@@ -87,7 +76,7 @@ export function IFPSSystem({ onIpfsReady }: Props) {
 
         setTimeout(() => { init(); }, 1500);
 
-    }, [ dispatch, isMounted, onIpfsReady ]);
+    }, [ dispatch, siteStateDispatch, isMounted, ]);
 
 
     useEffect(() => {
@@ -95,14 +84,39 @@ export function IFPSSystem({ onIpfsReady }: Props) {
         if (!ipfs)
             return;
 
+        let latest_state: SystemState | null = null;
         const check = async () => {
 
             try {
+
+                if (!ipfs) {
+                    setDbState(() => SystemState.disconnected);
+                    siteStateDispatch({
+                        type: 'setIpfsReady',
+                        value: false
+                    });
+                    return
+                }
+
                 await ipfs.id();
+
+                if (latest_state === SystemState.connected)
+                    return;
+
                 setDbState(() => SystemState.connected);
+                latest_state = SystemState.connected;
+
+                siteStateDispatch({
+                    type: 'setIpfsReady',
+                    value: true
+                });
             }
             catch (error: any) {
                 setDbState(() => SystemState.disconnected);
+                siteStateDispatch({
+                    type: 'setIpfsReady',
+                    value: false
+                });
             }
         };
 
@@ -110,7 +124,7 @@ export function IFPSSystem({ onIpfsReady }: Props) {
 
         return () => { clearInterval(interval); };
 
-    }, [ ipfs ]);
+    }, [ ipfs, siteStateDispatch ]);
 
 
     const handleOpen = () => {
