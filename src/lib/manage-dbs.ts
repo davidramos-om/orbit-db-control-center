@@ -10,7 +10,20 @@ import { addRemotePins } from "./manage-ipfs";
 
 //** DATABASE MANAGER **//
 
-export const getOneDatabase = async ({ address, load, onReplicate, onReady, onWrite }: {
+//creat a hash of the database address that as been opened
+const OpenedDBs: { [ key: string ]: Store } = {};
+
+export function clearOpenedDBs() {
+
+    for (const key in OpenedDBs) {
+        const db = OpenedDBs[ key ];
+        db.close();
+    }
+
+    Object.keys(OpenedDBs).forEach(key => delete OpenedDBs[ key ]);
+}
+
+export const getOneDatabase = async ({ address, load = false, onReplicate, onReady, onWrite }: {
     address: string;
     load: boolean,
     onReplicate?: () => void;
@@ -25,7 +38,11 @@ export const getOneDatabase = async ({ address, load, onReplicate, onReady, onWr
     if (!orbitdb)
         throw new Error('OrbitDB not initialized');
 
-    let db: any = null;
+    console.log('getOneDatabase', { OpenedDBs });
+    if (OpenedDBs[ address ])
+        return OpenedDBs[ address ];
+
+    let db: Store | null = null;
     if (orbitdb) {
         db = await orbitdb.open(address, {
             localOnly: false, //* load from local storage
@@ -35,6 +52,9 @@ export const getOneDatabase = async ({ address, load, onReplicate, onReady, onWr
         });
 
         if (db) {
+
+            OpenedDBs[ address ] = db;
+
             if (onReplicate)
                 db.events.on('replicated', onReplicate);
 
@@ -63,12 +83,13 @@ export const connectToDb = async (address: string): Promise<{ db: Store; hash: s
     if (!program)
         return Promise.reject('Programs database not initialized');
 
-    const db = await orbitdb.open(address, {
-        localOnly: false, //* load from local storage
-        create: false, //* create if doesn't exist
-        overwrite: false, //* overwrite if exists
-        replicate: true, //* replicate across peers        
+    const db = await getOneDatabase({
+        address,
+        load: false,
     });
+
+    if (!db)
+        return Promise.reject('Database not found');
 
     const hash = await program.add({
         name: (db as any).dbname,

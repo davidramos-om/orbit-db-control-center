@@ -4,7 +4,7 @@ import { validateParams } from './helper';
 //* More info on the DocsStore API: https://github.com/orbitdb/orbit-db-docstore#readme
 
 interface AddDocEntryArgs {
-    docstore: DocStore<any>;
+    store: DocStore<any>;
     entry: any;
     pin: boolean;
 }
@@ -22,8 +22,7 @@ interface QueryDocEntryArgs {
     }
 }
 
-export async function AddEntry({ docstore, entry, pin }: AddDocEntryArgs) {
-
+export async function AddEntry({ store: docstore, entry, pin }: AddDocEntryArgs) {
     validateParams({ docstore, entry });
     const hash = await (docstore as any).put(entry, { pin });
     return hash;
