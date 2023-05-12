@@ -59,7 +59,7 @@ function CreateDbDialog() {
                 access: [ dbIdentity, ...identities ]
             });
 
-            const program = await getProgramByHash(hash);
+            const program = getProgramByHash(hash);
             const dbEntry = MapOrbitDbEntry(program);
 
             dispatch({
@@ -79,6 +79,13 @@ function CreateDbDialog() {
             onClose();
         }
         catch (error: any) {
+
+            toast({
+                position: 'top',
+                description: `Failed to create database, please check the output console for more details`,
+                status: 'error',
+                isClosable: true,
+            });
 
             logDispatch({
                 type: 'add',
