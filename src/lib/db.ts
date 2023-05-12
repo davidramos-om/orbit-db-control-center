@@ -78,7 +78,7 @@ export const initOrbitDB = async (ipfs: IPFS) => {
   if (orbitdb)
     return orbitdb;
 
-  const _orbitdb = await OrbitDB.createInstance(ipfs, {
+  const _orbitdb = await OrbitDB.createInstance(ipfs as any, {
     directory: './orbitdb',
   });
 
