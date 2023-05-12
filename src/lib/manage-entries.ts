@@ -7,6 +7,7 @@ import CounterStore from "orbit-db-counterstore";
 
 import { AddEntry as AddDocStoreEntry, queryEntries as fetchDocEntries, deleteEntry as delDocumentEntry } from "./docs-store";
 import { addEntry as AddFeedStoreEntry, iterator as queryFeedEntries, deleteEntry as deleteFeedEntry } from "./feed-store";
+import { pinData } from "./manage-dbs";
 
 //* params *//
 export type addEntryOptions = {
@@ -104,19 +105,30 @@ export const fetchEntries = async (db: Store, options: fetchDbOptions = {
 
 export const addEntry = async (db: Store, options: addEntryOptions) => {
 
+    const dbAddres = db.address.toString();
     const { pin, entry } = options || {};
     const key = Object.keys(entry)[ 0 ];
     const value = entry[ key ];
 
-    if (db instanceof FeedStore)
-        return AddFeedStoreEntry({
+    if (db instanceof FeedStore) {
+        const _entry = await AddFeedStoreEntry({
             store: db,
             entry,
             pin,
         });
 
-    if (db instanceof EventStore)
-        return db.add(entry);
+        pinData(dbAddres);
+        return _entry;
+    }
+
+
+
+    if (db instanceof EventStore) {
+
+        const _entry = await db.add(entry);
+        pinData(dbAddres);
+        return _entry;
+    }
 
     if (db instanceof KeyValueStore) {
 
@@ -126,15 +138,21 @@ export const addEntry = async (db: Store, options: addEntryOptions) => {
         const theKey = entry.key;
         const _entry = { ...entry };
         delete _entry[ 'key' ];
-        return db.put(theKey, _entry, { pin, });
+        const added = await db.put(theKey, _entry, { pin, });
+
+        pinData(dbAddres);
+        return added;
     }
 
     if (db instanceof DocumentStore) {
-        return AddDocStoreEntry({
+        const added = AddDocStoreEntry({
             store: db,
             entry,
             pin,
         });
+
+        pinData(dbAddres);
+        return added;
     }
 
     if (db instanceof CounterStore)
