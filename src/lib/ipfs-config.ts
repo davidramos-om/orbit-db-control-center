@@ -17,6 +17,7 @@ const ipfsConfig: Options = {
     }
   },
   EXPERIMENTAL: {
+    // pubsub: true,
     ipnsPubsub: true,
     sharding: true,
   },
