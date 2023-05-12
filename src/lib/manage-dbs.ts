@@ -1,5 +1,6 @@
-import { CID, Version } from "multiformats";
+import { CID } from "multiformats";
 import Store from "orbit-db-store";
+import Identities from 'orbit-db-identity-provider'
 
 import { DBPermission, DBType, DataBaseInstance } from "./types";
 import { parseOrbitDbAddress } from "./helper";
@@ -119,6 +120,8 @@ export const createDatabase = async (
 }> => {
 
     const { orbitdb, program, ipfs } = getInstances();
+    console.log(`🐛  -> 🔥 :  orbitdb:`, orbitdb);
+
 
     if (!ipfs)
         return Promise.reject('IPFS not initialized');
@@ -190,6 +193,13 @@ export const createDatabase = async (
             throw new Error('Invalid database type');
     }
 
+    // const identity = await (orbitdb as any).identity.createIdentity();
+    const optionsIdentity = { id: (orbitdb as any).identity.id };
+    const identity = await Identities.createIdentity(optionsIdentity)
+
+    db.setIdentity(identity);
+    await db.load()
+
     const hash = await program.add({
         name: dbName,
         type,
@@ -229,10 +239,16 @@ export function pinData(dbAddress: string) {
     if (!cid)
         throw new Error('Invalid database address');
 
-    return ipfs.pin.add(cid);
+    return ipfs.pin.add(cid, {
+        timeout: 10000,
+        recursive: true,
+        preload: true,
+        // lock: true,
+        signal: undefined
+    });
 }
 
-export async function pinDataRemotely(cid: CID<unknown, number, number, Version>) {
+export async function pinDataRemotely(cid: CID) {
 
     const { ipfs } = getInstances();
     if (!ipfs)
